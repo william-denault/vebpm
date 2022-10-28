@@ -2,7 +2,9 @@
 
 export(ebnm_params_default)
 export(gen_data_exp)
-export(gen_data_identity)
+export(gen_data_gamma)
+export(gen_data_log_link)
+export(gen_data_t)
 export(nb_mean_lower_bound)
 export(nb_mean_polya_gamma)
 export(pois_mean_GG)
