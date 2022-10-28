@@ -7,33 +7,8 @@
 nm_penalty_compound(theta, s, w, mu, grid)
 }
 \description{
-#'@title inverse operator of S, parallel version using mclapply
-#'@description  S^{-1}(theta) returns the z such that S(z) = theta
+
 }
 \details{
-library(parallel)
-S_inv_parallel = function(theta,s,w,mu,grid,z_range=NULL){
 
-  obj = function(z,theta,s,w,mu,grid){
-    return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
-  }
-
-  f = function(i,theta,s,w,mu,grid,z_range){
-    if(theta[i]>=0){
-      return(uniroot(obj,c(theta[i],z_range[2]),
-                         theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
-    }else{
-     return(uniroot(obj,c(z_range[1],theta[i]),
-                         theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
-    }
-  }
-
-  if(is.null(z_range)){
-    z_range = range(theta) + c(-5,5)
-  }
-
-  n = length(theta)
-  z_out = simplify2array(mclapply(1:n,f,theta=theta,s=s,w=w,mu=mu,grid=grid,z_range=z_range,mc.cores = 10))
-  z_out
-}
 }

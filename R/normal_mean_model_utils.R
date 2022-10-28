@@ -334,34 +334,75 @@ S_inv_obj_jac = function(z,theta,s,w,mu,grid){
 # $estim.precis
 # [1] NaN
 
-#'@title inverse PM operator
-#'@description I tried supply the Jacobin matrix but there's always an error says singular matrix. But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
-#'@import rootSolve
-#'@import nleqslv
+#'@title bisection for root finding. Vectorized
+#'@description from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
+bisection= function(f, lower, upper, ...,
+                    maxiter =100,
+                    tol = 1e-8) {
+
+  fl=f(lower, ...)
+  fu=f(upper, ...)
+  if(any(fl*fu>0)){
+    print(which(fl*fu>0))
+    stop('f at lower and upper must have opposite sign')
+  }
+  for(n in 1:maxiter) {
+    mid=(lower+upper)/2
+    fmid=f(mid, ...)
+    if(all(abs(fmid) < tol)){
+      break
+    }
+    samesign = ((fmid<0)&(fl<0))|((fmid>=0)&(fl>=0))
+    lower = ifelse(samesign, mid, lower)
+    fl = ifelse(samesign, fmid, fl)
+    upper = ifelse(!samesign, mid, upper)
+    fu = ifelse(!samesign, fmid, fu)
+  }
+  return(mid)
+}
+
+#' #'@title inverse PM operator
 S_inv = function(theta,s,w,mu,grid){
-  if(grid[1]==0&isTRUE(all.equal(w[1],1))){
+  #print(grid[1]==0)
+  #print(all.equal(w[1],1))
+  if(grid[1]==0&isTRUE(all.equal(w[1],1,tol=1e-5))){
     return(rep(mu,length(theta)))
   }else{
-    sol = multiroot(S_inv_obj,start = theta,
-                        #jacfunc=S_inv_obj_jac,
-                        jactype = 'bandint',
-                        bandup=0,banddown=0,maxiter =100,
-                        theta=theta,s=s,w=w,mu=mu,grid=grid)
-    #print(sol)
-    if(is.nan(sol$estim.precis)|sol$iter==1){
-      sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
-                    theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
-      if(sol$iter==1){
-        return(S_inv_loop(theta,s,w,mu,grid))
-      }else{
-        return(sol$x)
-      }
-
-    }else{
-      return(sol$root)
-    }
+    n = length(theta)
+    lower = ifelse(theta>=mu,theta-1,theta-s^2*10)
+    upper = ifelse(theta<=mu,theta+1,theta+s^2*10)
+    return(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta))
   }
 }
+
+
+#' #' I tried supply the Jacobin matrix but there's always an error says singular matrix. But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
+#' #' rootSolve
+#' #' nleqslv
+#' S_inv = function(theta,s,w,mu,grid){
+#'   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
+#'     return(rep(mu,length(theta)))
+#'   }else{
+#'     sol = multiroot(S_inv_obj,start = theta,
+#'                         #jacfunc=S_inv_obj_jac,
+#'                         jactype = 'bandint',
+#'                         bandup=0,banddown=0,maxiter =100,
+#'                         theta=theta,s=s,w=w,mu=mu,grid=grid)
+#'     #print(sol)
+#'     if(is.nan(sol$estim.precis)|sol$iter==1){
+#'       sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
+#'                     theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
+#'       if(sol$iter==1){
+#'         return(S_inv_loop(theta,s,w,mu,grid))
+#'       }else{
+#'         return(sol$x)
+#'       }
+#'
+#'     }else{
+#'       return(sol$root)
+#'     }
+#'   }
+#' }
 
 
 # S_inv3 = function(theta,s,w,mu,grid){
@@ -372,45 +413,45 @@ S_inv = function(theta,s,w,mu,grid){
 #   return(opt)
 # }
 
-#########################S_inv using uniroot in a for loop. Slow###############'@title inverse operator of S
-#'@description  S^{-1}(theta) returns the z such that S(z) = theta
-S_inv_loop = function(theta,s,w,mu,grid,z_range=NULL){
-
-  # obj = function(z,theta,s,w,mu,grid){
-  #   return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
-  # }
-
-  if(grid[1]==0&isTRUE(all.equal(w[1],1))){
-    return(rep(mu,length(theta)))
-  }else{
-    if(is.null(z_range)){
-      z_range = c(-10,10)
-    }
-    n = length(theta)
-    z_out = double(n)
-    for(j in 1:n){
-      #print(j)
-      if(theta[j]>=0){
-        # z_out[j] = uniroot(obj,c(theta[j],theta[j]/median(1/(1+s[j]^2/grid^2))),
-        #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
-        z_out[j] = uniroot(S_inv_obj,c(theta[j],z_range[2]),
-                           theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
-      }else{
-        # z_out[j] = uniroot(obj,c(theta[j]/median(1/(1+s[j]^2/grid^2)),theta[j]),
-        #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
-        z_out[j] = uniroot(S_inv_obj,c(z_range[1],theta[j]),
-                           theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
-      }
-
-    }
-    return(z_out)
-  }
-
-
-}
+#' #########################S_inv using uniroot in a for loop. Slow###############'@title inverse operator of S
+#' #'  S^{-1}(theta) returns the z such that S(z) = theta
+#' S_inv_loop = function(theta,s,w,mu,grid,z_range=NULL){
 #'
-#' #'@title inverse operator of S, parallel version using mclapply
-#' #'@description  S^{-1}(theta) returns the z such that S(z) = theta
+#'   # obj = function(z,theta,s,w,mu,grid){
+#'   #   return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
+#'   # }
+#'
+#'   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
+#'     return(rep(mu,length(theta)))
+#'   }else{
+#'     if(is.null(z_range)){
+#'       z_range = c(-10,10)
+#'     }
+#'     n = length(theta)
+#'     z_out = double(n)
+#'     for(j in 1:n){
+#'       #print(j)
+#'       if(theta[j]>=0){
+#'         # z_out[j] = uniroot(obj,c(theta[j],theta[j]/median(1/(1+s[j]^2/grid^2))),
+#'         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
+#'         z_out[j] = uniroot(S_inv_obj,c(theta[j],z_range[2]),
+#'                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
+#'       }else{
+#'         # z_out[j] = uniroot(obj,c(theta[j]/median(1/(1+s[j]^2/grid^2)),theta[j]),
+#'         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
+#'         z_out[j] = uniroot(S_inv_obj,c(z_range[1],theta[j]),
+#'                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
+#'       }
+#'
+#'     }
+#'     return(z_out)
+#'   }
+
+
+#'}
+#'
+#' #' inverse operator of S, parallel version using mclapply
+#' #'  S^{-1}(theta) returns the z such that S(z) = theta
 #'
 #' library(parallel)
 #' S_inv_parallel = function(theta,s,w,mu,grid,z_range=NULL){

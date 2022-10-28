@@ -2,10 +2,10 @@
 % Please edit documentation in R/normal_mean_model_utils.R
 \name{S_inv}
 \alias{S_inv}
-\title{inverse PM operator}
+\title{#'@title inverse PM operator}
 \usage{
 S_inv(theta, s, w, mu, grid)
 }
 \description{
-I tried supply the Jacobin matrix but there's always an error says singular matrix. But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
+#'@title inverse PM operator
 }
