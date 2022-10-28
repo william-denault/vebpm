@@ -113,8 +113,8 @@ pois_mean_GG = function(x,
 
   }
 
-  return(list(posterior = list(posteriorMean_latent = m,
-                               posteriorVar_latent = v,
+  return(list(posterior = list(posteriorMean_log_mean = m,
+                               posteriorVar_log_mean = v,
                                posteriorMean_mean = exp(m + v/2)),
               fitted_g = list(mean = beta, var=sigma2),
               obj_value=obj))

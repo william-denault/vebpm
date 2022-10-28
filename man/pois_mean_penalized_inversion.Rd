@@ -31,7 +31,7 @@ pois_mean_penalized_inversion(
 }
 \value{
 a list of
- \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+ \item{posterior:}{posteriorMean_log_mean is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
  \item{fitted_g:}{estimated prior}
 }
 \description{

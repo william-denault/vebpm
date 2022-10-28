@@ -8,7 +8,7 @@
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
-#'  \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+#'  \item{posterior:}{posteriorMean_log_mean is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
 #'  \item{fitted_g:}{estimated prior}
 #'@examples
 #'\dontrun{
@@ -62,8 +62,8 @@ pois_mean_penalized_inversion = function(x,
   mu_hat = fit$par[n+K+1]
   s_hat = sqrt(exp(-m))
   z_hat = S_inv(m,s_hat,w_hat,mu_hat,mixsd)
-  return(list(posterior = list(posteriorMean_latent = m,
-                               posteriorVar_latent = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
+  return(list(posterior = list(posteriorMean_log_mean = m,
+                               posteriorVar_log_mean = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
                                posteriorMean_mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               fit =list(z=z_hat,s=s_hat,optim_fit = fit)))

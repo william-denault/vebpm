@@ -23,8 +23,8 @@ nm_density = function(x,s,mu,grid){
 #'@return a vector of likelihood, of length n
 f_nm = function(x,s,w,mu,grid){
   temp = c(nm_density(x,s,mu,grid)%*%w)
-  return(temp)
-  #return(pmax(temp,.Machine$double.eps))
+  #return(temp)
+  return(pmax(temp,1e-5))
 }
 
 # n = 100000
@@ -64,7 +64,7 @@ l_nm_d1_z = function(x,s,w,mu,grid){
   }
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d1_z(x,s,w,mu,grid)/temp)
   }
@@ -77,7 +77,7 @@ l_nm_d2_z = function(x,s,w,mu,grid){
   }
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d2_z(x,s,w,mu,grid)/temp - (f_nm_d1_z(x,s,w,mu,grid)/temp)^2)
   }
@@ -90,7 +90,7 @@ l_nm_d3_z = function(x,s,w,mu,grid){
   }
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d3_z(x,s,w,mu,grid)/temp - 3*f_nm_d1_z(x,s,w,mu,grid)*f_nm_d2_z(x,s,w,mu,grid)/temp^2 +2*(f_nm_d1_z(x,s,w,mu,grid)/temp)^3)
   }
@@ -117,7 +117,7 @@ f_nm_d2_zs2 = function(x,s,w,mu,grid){
 l_nm_d1_s2 = function(x,s,w,mu,grid){
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d1_s2(x,s,w,mu,grid)/temp)
   }
@@ -127,7 +127,7 @@ l_nm_d1_s2 = function(x,s,w,mu,grid){
 l_nm_d2_zs2 = function(x,s,w,mu,grid){
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d2_zs2(x,s,w,mu,grid)/temp-f_nm_d1_s2(x,s,w,mu,grid)*f_nm_d1_z(x,s,w,mu,grid)/temp^2)
   }
@@ -158,7 +158,7 @@ l_nm_d1_a = function(x,s,a,mu,grid){
   w = softmax(a)
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d1_a(x,s,a,mu,grid)/temp)
   }
@@ -170,7 +170,7 @@ l_nm_d2_za = function(x,s,a,mu,grid){
   w = softmax(a)
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d2_za(x,s,a,mu,grid)/temp - f_nm_d1_a(x,s,a,mu,grid)*f_nm_d1_z(x,s,w,mu,grid)/temp^2)
   }
@@ -200,7 +200,7 @@ l_nm_d1_mu = function(x,s,w,mu,grid){
   }
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d1_mu(x,s,w,mu,grid)/temp)
   }
@@ -213,7 +213,7 @@ l_nm_d2_zmu = function(x,s,w,mu,grid){
   }
   temp = f_nm(x,s,w,mu,grid)
   if(any(temp==0)){
-    return(0)
+    return(rep(0,length(x)))
   }else{
     return(f_nm_d2_zmu(x,s,w,mu,grid)/temp-f_nm_d1_z(x,s,w,mu,grid)*f_nm_d1_mu(x,s,w,mu,grid)/temp^2)
   }
@@ -361,7 +361,9 @@ bisection= function(f, lower, upper, ...,
   return(mid)
 }
 
-#' #'@title inverse PM operator
+#'@title inverse PM operator
+#'@import rootSolve
+#'@import nleqslv
 S_inv = function(theta,s,w,mu,grid){
   #print(grid[1]==0)
   #print(all.equal(w[1],1))
@@ -371,7 +373,24 @@ S_inv = function(theta,s,w,mu,grid){
     n = length(theta)
     lower = ifelse(theta>=mu,theta-1,theta-s^2*10)
     upper = ifelse(theta<=mu,theta+1,theta+s^2*10)
-    return(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta))
+    sol = try(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta))
+    if(class(sol)=='try-error'){
+        sol = multiroot(S_inv_obj,start = theta,
+                            #jacfunc=S_inv_obj_jac,
+                            jactype = 'bandint',
+                            bandup=0,banddown=0,maxiter =100,
+                            theta=theta,s=s,w=w,mu=mu,grid=grid)
+        #print(sol)
+        if(is.nan(sol$estim.precis)|sol$iter==1){
+          sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
+                        theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
+          return(sol$x)
+        }else{
+          return(sol$root)
+        }
+    }else{
+      return(sol)
+    }
   }
 }
 

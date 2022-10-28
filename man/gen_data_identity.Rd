@@ -13,6 +13,7 @@ gen_data_identity(
   t_df = 3,
   t_delta = 2,
   quasi_sparse = 0.1,
+  exp_rate = 0.5,
   w = 0.8,
   seed = 12345
 )

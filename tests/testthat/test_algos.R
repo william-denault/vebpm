@@ -17,3 +17,8 @@ res_split_mixture = (pois_mean_split_mixture(x,tol=tol,maxiter = maxiter,ebnm_pa
 
 res_compound = (pois_mean_penalized_compound(x))
 res_inversion = (pois_mean_penalized_inversion(x))
+
+
+
+#simdata = gen_data_identity(n=100,n_simu=3,prior = 'exponential')
+#out= simu_study_poisson_mean(simdata,n_cores = 1)

@@ -142,9 +142,9 @@ pois_mean_split_mixture = function(x,s=NULL,
 
   }
 
-  return(list(posterior = list(posteriorMean_latent_mu = rowSums(qz*M),
+  return(list(posterior = list(posteriorMean_log_mean = rowSums(qz*M),
                                posteriorMean_latent_b = b_pm,
-                               posterior2nd_moment_latent_mu = rowSums(qz*(M^2+V)),
+                               posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)),
                                posteriorVar_latent_b = b_pv,
                                posteriorMean_mean = rowSums(qz*exp(M + V/2))),
               fitted_g = list(g_mu = list(weight=w,var=sigma2k),g_b = res$fitted_g),

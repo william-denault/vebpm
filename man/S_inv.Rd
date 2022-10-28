@@ -2,10 +2,10 @@
 % Please edit documentation in R/normal_mean_model_utils.R
 \name{S_inv}
 \alias{S_inv}
-\title{#'@title inverse PM operator}
+\title{inverse PM operator}
 \usage{
 S_inv(theta, s, w, mu, grid)
 }
 \description{
-#'@title inverse PM operator
+inverse PM operator
 }

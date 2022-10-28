@@ -163,8 +163,8 @@ pois_mean_GMGM = function(x,
 
   }
 
-  return(list(posterior = list(posteriorMean_latent = rowSums(qz*M) + qz0*beta,
-                               posterior2nd_moment_latent = rowSums(qz*(M^2+V)) + qz0*beta^2,
+  return(list(posterior = list(posteriorMean_log_mean = rowSums(qz*M) + qz0*beta,
+                               posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)) + qz0*beta^2,
                                posteriorMean_mean = rowSums(qz*exp(M + V/2))+ qz0*exp(beta)),
               fitted_g = list(weight = c(w0,w),mean=beta,var=c(0,sigma2k)),
               obj_value=obj,

@@ -71,7 +71,8 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
   }
   return(list(posterior = list(posteriorMean_latent = m,
                                posteriorVar_latent = v,
-                               posteriorMean_mean = log(1+exp(m))),
+                               posteriorMean_mean = log(1+exp(m)),
+                               posteriorMean_log_mean = log(log(1+exp(m)))),
               fitted_g = res$fitted_g,
               obj_value=obj,
               fit = res))

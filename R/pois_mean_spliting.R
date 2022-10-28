@@ -102,9 +102,9 @@ pois_mean_split = function(x,s=NULL,
     }
 
   }
-  return(list(posterior = list(posteriorMean_latent_mu = mu_pm,
+  return(list(posterior = list(posteriorMean_log_mean = mu_pm,
                                posteriorMean_latent_b = b_pm,
-                               posteriorVar_latent_mu = mu_pv,
+                               posteriorVar_log_mean = mu_pv,
                                posteriorVar_latent_b = b_pv,
                                posteriorMean_mean = exp(mu_pm + mu_pv/2)),
               fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),

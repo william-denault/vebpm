@@ -67,8 +67,8 @@ pois_mean_penalized_compound = function(x,
   mu_hat = out$solution[(2*n+K+1)]
   m = S(z_hat,s_hat,w_hat,mu_hat,mixsd)
 
-  return(list(posterior = list(posteriorMean_latent = m,
-                               posteriorVar_latent = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
+  return(list(posterior = list(posteriorMean_log_mean = m,
+                               posteriorVar_log_mean = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
                                posteriorMean_mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               fit =list(z=z_hat,s=s_hat,nloptr_fit = out)))
