@@ -130,7 +130,8 @@ simu_study_poisson_mean = function(sim_data,
                                                    'nb_lb','nb_pg',
                                                    'log1exp','split','split_mixture',
                                                    'penalty_compound',
-                                                   'penalty_inversion')){
+                                                   'penalty_inversion'),
+                                   save_data = TRUE){
   X = sim_data$X
   #Mean,log_Mean
   n_simu = nrow(X)
@@ -217,7 +218,12 @@ simu_study_poisson_mean = function(sim_data,
                 MAE_log_mean=MAE_log_mean))
 
   },mc.cores = n_cores)
-  res
+  if(save_data){
+    return(list(sim_data=sim_data,output = res))
+  }else{
+    return(res)
+  }
+
 }
 
 ## get scores
