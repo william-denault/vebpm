@@ -2,10 +2,10 @@
 % Please edit documentation in R/pois_mean_GG.R
 \name{pois_mean_GG_opt_obj}
 \alias{pois_mean_GG_opt_obj}
-\title{calculate objective function}
+\title{calculate VGA Poisson objective function}
 \usage{
 pois_mean_GG_opt_obj(theta, x, s, beta, sigma2, n)
 }
 \description{
-calculate objective function
+calculate VGA Poisson objective function
 }

@@ -2,10 +2,10 @@
 % Please edit documentation in R/pois_mean_GG.R
 \name{pois_mean_GG_opt_obj_gradient}
 \alias{pois_mean_GG_opt_obj_gradient}
-\title{calculate gradient vector}
+\title{calculate VGA Poisson objective function gradient}
 \usage{
 pois_mean_GG_opt_obj_gradient(theta, x, s, beta, sigma2, n)
 }
 \description{
-calculate gradient vector
+calculate VGA Poisson objective function gradient
 }

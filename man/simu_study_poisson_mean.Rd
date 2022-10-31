@@ -11,7 +11,8 @@ simu_study_poisson_mean(
   maxiter = 2000,
   n_cores = 10,
   method_list = c("GG", "GMG", "GMGM", "nb_lb", "nb_pg", "log1exp", "split",
-    "split_mixture", "penalty_compound", "penalty_inversion")
+    "split_mixture", "penalty_compound", "penalty_inversion"),
+  save_data = TRUE
 )
 }
 \description{
