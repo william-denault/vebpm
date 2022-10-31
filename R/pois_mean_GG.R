@@ -123,14 +123,16 @@ pois_mean_GG = function(x,
 
 }
 
-#'calculate objective function
+#'@title calculate VGA Poisson objective function
+#'@export
 pois_mean_GG_opt_obj = function(theta,x,s,beta,sigma2,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
   return(-sum(x*m-s*exp(m+exp(v)/2)-(m^2+exp(v)-2*m*beta)/2/sigma2+v/2))
 }
 
-#'calculate gradient vector
+#'@title calculate VGA Poisson objective function gradient
+#'@export
 pois_mean_GG_opt_obj_gradient = function(theta,x,s,beta,sigma2,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
