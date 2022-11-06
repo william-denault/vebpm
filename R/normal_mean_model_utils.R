@@ -338,14 +338,37 @@ S_inv_obj_jac = function(z,theta,s,w,mu,grid){
 #'@description from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
 bisection= function(f, lower, upper, ...,
                     maxiter =100,
-                    tol = 1e-8) {
+                    tol = 1e-8,
+                    search_step = 1) {
+
+  # make sure all f(lower)<0 and all f(upper)>0
+  l = which(f(lower,...) > 0)
+  u = which(f(upper,...) < 0)
+  while((sum(l)+sum(u))!=0){
+    if(sum(l)!=0){
+      lower[l] = lower[l] - search_step
+      fl = f(lower,...)
+      if(any(is.nan(fl))){
+        stop('NaN in f(lower)')
+      }
+      l = which(fl > 0)
+      #print(l)
+    }
+    if(sum(u)!=0){
+      upper[u] = upper[u] + search_step
+      fu = f(upper,...)
+      if(any(is.nan(fu))){
+        stop('NaN in f(upper)')
+      }
+      u = which(fu < 0)
+      #print(u)
+    }
+  }
+
 
   fl=f(lower, ...)
   fu=f(upper, ...)
-  if(any(fl*fu>0)){
-    print(which(fl*fu>0))
-    stop('f at lower and upper must have opposite sign')
-  }
+
   for(n in 1:maxiter) {
     mid=(lower+upper)/2
     fmid=f(mid, ...)
@@ -371,9 +394,12 @@ S_inv = function(theta,s,w,mu,grid){
     return(rep(mu,length(theta)))
   }else{
     n = length(theta)
-    lower = ifelse(theta>=mu,theta-1,theta-s^2*10)
-    upper = ifelse(theta<=mu,theta+1,theta+s^2*10)
+    lower = ifelse(theta>=mu,theta,theta-s^2*10)
+    upper = ifelse(theta<=mu,theta,theta+s^2*10)
+    #print(lower)
+    #print(upper)
     sol = try(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta))
+    #print(sol)
     if(class(sol)=='try-error'){
         sol = multiroot(S_inv_obj,start = theta,
                             #jacfunc=S_inv_obj_jac,

@@ -55,7 +55,7 @@ pois_mean_penalized_inversion = function(x,
 
   fit = optim(c(log(x+1),w,beta),f_obj,f_obj_grad,
               method = optim_method,y=x,grid=mixsd,
-              control=list(trace=verbose,maxit=maxiter,factr=1e10))
+              control=list(trace=verbose,maxit=maxiter,factr=1e11))
 
   m = fit$par[1:n]
   w_hat = softmax(fit$par[(n+1):(n+K)])
@@ -87,6 +87,7 @@ f_obj = function(params,y,grid){
   #print(theta)
   #print(l_nm(z,s,w,mu,grid))
   #z = S_inv(theta,s,w,mu,grid,z_range)
+  #print(val)
   return(val)
 }
 
