@@ -9,6 +9,7 @@ pois_mean_penalized_inversion(
   w = NULL,
   prior_mean = NULL,
   mixsd = NULL,
+  point_mass = TRUE,
   optim_method = "L-BFGS-B",
   maxiter = 1000,
   verbose = FALSE

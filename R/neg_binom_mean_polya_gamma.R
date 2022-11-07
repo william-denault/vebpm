@@ -98,10 +98,10 @@ nb_mean_polya_gamma = function(x,
   #   message('Not converged - Increase number of iterations.')
   # }
 
-  return(list(posterior = list(posteriorMean_latent = m,
-                               posteriorVar_latent = v,
-                               posteriorMean_mean = r*S_exp(pseudo_x,pseudo_s,res$fitted_g$pi,res$fitted_g$mean[1],res$fitted_g[[3]]),
-                               posteriorMean_log_mean = log(r)+m),
+  return(list(posterior = list(mean_latent = m,
+                               var_latent = v,
+                               mean = r*S_exp(pseudo_x,pseudo_s,res$fitted_g$pi,res$fitted_g$mean[1],res$fitted_g[[3]]),
+                               mean_log = log(r)+m),
               fitted_g = res$fitted_g,
               obj_value=obj,
               fit = res))

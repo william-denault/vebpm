@@ -31,7 +31,9 @@ pois_mean_GMG = function(x,
                          mixsd=NULL,
                          optim_method = 'L-BFGS-B',
                          maxiter = 1000,
-                         tol = 1e-5){
+                         tol = 1e-5,
+                         m_init = NULL,
+                         v_init = NULL){
   n = length(x)
 
   if(is.null(s)){
@@ -51,7 +53,8 @@ pois_mean_GMG = function(x,
 
 
   if(is.null(mixsd)){
-    sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
+    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
     if(min(sigma2k)>1e-4){
       sigma2k =c(1e-4,sigma2k)
     }
@@ -62,8 +65,18 @@ pois_mean_GMG = function(x,
   }
   K = length(sigma2k)
 
-  m = rep(0,n)
-  v = rep(1/n,n)
+  if(is.null(m_init)){
+    m = log(x+1)
+  }else{
+    m = m_init
+  }
+
+  if(is.null(v_init)){
+    v = rep(1/n,n)
+  }else{
+    v = v_init
+  }
+
 
   Sigma2k = matrix(sigma2k,nrow=n,ncol=K,byrow=T)
   if(is.null(w)){
@@ -96,7 +109,7 @@ pois_mean_GMG = function(x,
                 s=s,
                 qz=qz,
                 beta=beta,
-                sigma2k=sigma2k,
+                Sigma2k=Sigma2k,
                 n=n,
                 method = optim_method)
     m = opt$par[1:n]
@@ -107,7 +120,7 @@ pois_mean_GMG = function(x,
     }
 
     w = colMeans(qz)
-    w = pmax(w, 1e-8)
+    w = pmax(w, 1e-15)
 
     #print(w)
     obj[iter+1] = pois_mean_GMG_obj(x,s,m,v,w,beta,Sigma2k,qz)
@@ -119,9 +132,9 @@ pois_mean_GMG = function(x,
 
   }
 
-  return(list(posterior = list(posteriorMean_log_mean = m,
-                               posteriorVar_log_mean = v,
-                               posteriorMean_mean = exp(m+v/2)),
+  return(list(posterior = list(mean_log = m,
+                               var_log = v,
+                               mean = exp(m+v/2)),
               fitted_g = list(weight = w,mean=beta,var=sigma2k),
               obj_value=obj,
               qz=qz))
@@ -139,18 +152,18 @@ pois_mean_GMG_obj = function(x,s,m,s2,w,beta,Sigma2k,qz){
 }
 
 #' calc obj for optim
-pois_mean_GMG_opt_obj = function(theta,x,s,qz,beta,sigma2k,n){
+pois_mean_GMG_opt_obj = function(theta,x,s,qz,beta,Sigma2k,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
-  return(-sum(x*m-s*exp(m+exp(v)/2)-(m^2+exp(v)-2*m*beta)/2*sum(qz/sigma2k)+v/2))
+  return(-sum(x*m-s*exp(m+exp(v)/2)-sum((m^2+exp(v)-2*m*beta)*c(rowSums(qz/Sigma2k)))/2+v/2))
 }
 
 #'calculate gradient vector for optim
-pois_mean_GMG_opt_obj_gradient = function(theta,x,s,qz,beta,sigma2k,n){
+pois_mean_GMG_opt_obj_gradient = function(theta,x,s,qz,beta,Sigma2k,n){
   m = theta[1:n]
   v = theta[(n+1):(2*n)]
-  g1 = -(x-s*exp(m+exp(v)/2)-m*sum(qz/sigma2k)+beta*sum(qz/sigma2k))
-  g2 = -(-exp(v)/2*s*exp(m+exp(v)/2) - exp(v)/2*sum(qz/sigma2k) + 1/2)
+  g1 = -(x-s*exp(m+exp(v)/2)-(m-beta)*c(rowSums(qz/Sigma2k)))
+  g2 = -(-exp(v)/2*s*exp(m+exp(v)/2) - exp(v)/2*c(rowSums(qz/Sigma2k)) + 1/2)
   return(c(g1,g2))
 }
 

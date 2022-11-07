@@ -9,6 +9,7 @@ pois_mean_penalized_compound(
   w = NULL,
   prior_mean = NULL,
   mixsd = NULL,
+  point_mass = TRUE,
   maxiter = 100,
   verbose = FALSE,
   tol = 1e-04

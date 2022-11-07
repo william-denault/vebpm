@@ -26,6 +26,7 @@ pois_mean_penalized_inversion = function(x,
                                          w = NULL,
                                          prior_mean = NULL,
                                          mixsd=NULL,
+                                         point_mass = TRUE,
                                          optim_method = 'L-BFGS-B',
                                          maxiter = 1000,
                                          verbose=FALSE){
@@ -41,9 +42,16 @@ pois_mean_penalized_inversion = function(x,
   }
   if(is.null(mixsd)){
     ## how to choose grid in this case?
-    mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
+    #mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
+    s = 1
+    mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #mixsd = c(0,1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
+  }
+  if(point_mass){
+    if(mixsd[1]!=0){
+      mixsd = c(0,mixsd)
+    }
   }
   K = length(mixsd)
 
@@ -62,9 +70,9 @@ pois_mean_penalized_inversion = function(x,
   mu_hat = fit$par[n+K+1]
   s_hat = sqrt(exp(-m))
   z_hat = S_inv(m,s_hat,w_hat,mu_hat,mixsd)
-  return(list(posterior = list(posteriorMean_log_mean = m,
-                               posteriorVar_log_mean = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
-                               posteriorMean_mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
+  return(list(posterior = list(mean_log = m,
+                               var_log = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
+                               mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               fit =list(z=z_hat,s=s_hat,optim_fit = fit)))
 
@@ -73,6 +81,7 @@ pois_mean_penalized_inversion = function(x,
 
 }
 
+#'@title objective function for inversion method
 #'@param params (theta,w,mu)
 f_obj = function(params,y,grid){
   n = length(y)

@@ -10,8 +10,9 @@ simu_study_poisson_mean(
   tol = 1e-05,
   maxiter = 2000,
   n_cores = 10,
-  method_list = c("GG", "GMG", "GMGM", "nb_lb", "nb_pg", "log1exp", "split",
-    "split_mixture", "penalty_compound", "penalty_inversion"),
+  method_list = c("GG", "GMG", "GMGM", "GMGM_pointmass", "nb_lb", "nb_pg", "log1exp",
+    "split", "split_mixture", "penalty_compound", "penalty_inversion",
+    "ash_pois_identity", "ash_pois_log", "ebpm_gamma", "ebpm_exp_mixture"),
   save_data = TRUE
 )
 }

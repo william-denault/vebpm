@@ -52,7 +52,7 @@ pois_mean_split = function(x,s=NULL,
 
   b_pm = rep(0,n)
   #b_pv = rep(1/n,n)
-  mu_pm = rep(0,n)
+  mu_pm = log(1+x)
   mu_pv = rep(1/n,n)
   if(is.null(sigma2)){
     sigma2 = var(log(x+1))
@@ -102,11 +102,11 @@ pois_mean_split = function(x,s=NULL,
     }
 
   }
-  return(list(posterior = list(posteriorMean_log_mean = mu_pm,
-                               posteriorMean_latent_b = b_pm,
-                               posteriorVar_log_mean = mu_pv,
-                               posteriorVar_latent_b = b_pv,
-                               posteriorMean_mean = exp(mu_pm + mu_pv/2)),
+  return(list(posterior = list(mean_log = mu_pm,
+                               mean_b = b_pm,
+                               #osteriorVar_log_mean = mu_pv,
+                               #posteriorVar_latent_b = b_pv,
+                               mean = exp(mu_pm + mu_pv/2)),
               fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),
               obj_value=obj,
               fit = res))

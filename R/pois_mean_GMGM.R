@@ -57,7 +57,8 @@ pois_mean_GMGM = function(x,
 
     ## how to choose grid in this case?
     ## use ebnm method
-    sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
+    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
     #sigma2k = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #sigma2k = c(1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
   }else{
@@ -66,7 +67,7 @@ pois_mean_GMGM = function(x,
   K = length(sigma2k)
 
 
-  M = matrix(0,nrow=n,ncol=K)
+  M = matrix(log(1+x),nrow=n,ncol=K,byrow = F)
   V = matrix(1/n,nrow=n,ncol=K)
   Sigma2k = matrix(sigma2k,nrow=n,ncol=K,byrow=T)
   X = matrix(x,nrow=n,ncol=K,byrow=F)
@@ -125,7 +126,7 @@ pois_mean_GMGM = function(x,
     # update posterior weights
     qz = X*M-s*exp(M+V/2)+matrix(log(w),nrow=n,ncol=K,byrow=T)-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/Sigma2k/2 + log(V)/2
     if(point_mass){
-      qz0 = x*beta - exp(beta) + log(w0)
+      qz0 = x*beta - s*exp(beta) + log(w0)
       qz = cbind(qz0,qz)
     }
     #browser()
@@ -150,9 +151,9 @@ pois_mean_GMGM = function(x,
     }
 
     w = colMeans(qz)
-    w = pmax(w, 1e-8)
+    w = pmax(w, 1e-15)
     w0 = mean(qz0)
-    w0 = pmax(w0,1e-8)
+    w0 = pmax(w0,1e-15)
 
 
     obj[iter+1] = pois_mean_GMGM_obj(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0)
@@ -163,9 +164,9 @@ pois_mean_GMGM = function(x,
 
   }
 
-  return(list(posterior = list(posteriorMean_log_mean = rowSums(qz*M) + qz0*beta,
-                               posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)) + qz0*beta^2,
-                               posteriorMean_mean = rowSums(qz*exp(M + V/2))+ qz0*exp(beta)),
+  return(list(posterior = list(mean_log = rowSums(qz*M) + qz0*beta,
+                               #2nd_moment_log = rowSums(qz*(M^2+V)) + qz0*beta^2,
+                               mean = rowSums(qz*exp(M + V/2))+ qz0*exp(beta)),
               fitted_g = list(weight = c(w0,w),mean=beta,var=c(0,sigma2k)),
               obj_value=obj,
               fit = list(M=M,V=V,qz=qz,qz0=qz0)))

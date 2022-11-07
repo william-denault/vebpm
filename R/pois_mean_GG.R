@@ -30,12 +30,23 @@ pois_mean_GG = function(x,
                         prior_var=NULL,
                         optim_method = 'L-BFGS-B',
                         maxiter = 1000,
-                        tol = 1e-5){
+                        tol = 1e-5,
+                        m_init = NULL,
+                        v_init = NULL){
 
   # init the posterior mean and variance?
   n = length(x)
-  m = log(x+0.1)
-  v = rep(1/n,n)
+  if(is.null(m_init)){
+    m = log(x+1)
+  }else{
+    m = m_init
+  }
+
+  if(is.null(v_init)){
+    v = rep(1/n,n)
+  }else{
+    v = v_init
+  }
   if(is.null(s)){
     s = 1
   }
@@ -113,9 +124,9 @@ pois_mean_GG = function(x,
 
   }
 
-  return(list(posterior = list(posteriorMean_log_mean = m,
-                               posteriorVar_log_mean = v,
-                               posteriorMean_mean = exp(m + v/2)),
+  return(list(posterior = list(mean_log = m,
+                               var_log = v,
+                               mean = exp(m + v/2)),
               fitted_g = list(mean = beta, var=sigma2),
               obj_value=obj))
 

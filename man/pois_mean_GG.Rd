@@ -11,7 +11,9 @@ pois_mean_GG(
   prior_var = NULL,
   optim_method = "L-BFGS-B",
   maxiter = 1000,
-  tol = 1e-05
+  tol = 1e-05,
+  m_init = NULL,
+  v_init = NULL
 )
 }
 \arguments{

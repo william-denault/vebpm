@@ -55,7 +55,8 @@ pois_mean_split_mixture = function(x,s=NULL,
 
     ## how to choose grid in this case?
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
-    sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=log(sum(x)/sum(s)))[-1])^2
+    #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=log(sum(x)/sum(s)))[-1])^2
+    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
     if(min(sigma2k)>1e-4){
       sigma2k =c(1e-4,sigma2k)
     }
@@ -71,7 +72,7 @@ pois_mean_split_mixture = function(x,s=NULL,
 
   b_pm = rep(0,n)
   b_pv = rep(1/n,n)
-  M = matrix(0,nrow=n,ncol=K)
+  M = matrix(log(1+x),nrow=n,ncol=K,byrow = F)
   V = matrix(1/n,nrow=n,ncol=K)
   Sigma2k = matrix(sigma2k,nrow=n,ncol=K,byrow=T)
   X = matrix(x,nrow=n,ncol=K,byrow=F)
@@ -142,11 +143,11 @@ pois_mean_split_mixture = function(x,s=NULL,
 
   }
 
-  return(list(posterior = list(posteriorMean_log_mean = rowSums(qz*M),
-                               posteriorMean_latent_b = b_pm,
-                               posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)),
-                               posteriorVar_latent_b = b_pv,
-                               posteriorMean_mean = rowSums(qz*exp(M + V/2))),
+  return(list(posterior = list(mean_log = rowSums(qz*M),
+                               mean_b = b_pm,
+                               #posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)),
+                               #posteriorVar_latent_b = b_pv,
+                               mean = rowSums(qz*exp(M + V/2))),
               fitted_g = list(g_mu = list(weight=w,var=sigma2k),g_b = res$fitted_g),
               obj_value=obj,
               fit = list(ebnm_fit=res,M=M,V=V,qz=qz)))

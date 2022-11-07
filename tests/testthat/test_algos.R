@@ -20,5 +20,5 @@ res_inversion = (pois_mean_penalized_inversion(x))
 
 
 
-#simdata = gen_data_identity(n=100,n_simu=3,prior = 'exponential')
+#simdata = gen_data_gamma(n=100,n_simu=2)
 #out= simu_study_poisson_mean(simdata,n_cores = 1)

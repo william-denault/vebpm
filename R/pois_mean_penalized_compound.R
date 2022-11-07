@@ -23,6 +23,7 @@ pois_mean_penalized_compound = function(x,
                                          w = NULL,
                                          prior_mean = NULL,
                                          mixsd=NULL,
+                                        point_mass = TRUE,
                                          maxiter = 100,
                                         verbose=FALSE,
                                         tol=1e-4){
@@ -37,9 +38,16 @@ pois_mean_penalized_compound = function(x,
 
   if(is.null(mixsd)){
     ## how to choose grid in this case?
-    mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
+    #mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
+    s = 1
+    mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #mixsd = c(0,1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
+  }
+  if(point_mass){
+    if(mixsd[1]!=0){
+      mixsd = c(0,mixsd)
+    }
   }
   K = length(mixsd)
 
@@ -67,9 +75,9 @@ pois_mean_penalized_compound = function(x,
   mu_hat = out$solution[(2*n+K+1)]
   m = S(z_hat,s_hat,w_hat,mu_hat,mixsd)
 
-  return(list(posterior = list(posteriorMean_log_mean = m,
-                               posteriorVar_log_mean = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
-                               posteriorMean_mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
+  return(list(posterior = list(mean_log = m,
+                               var_log = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
+                               mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               fit =list(z=z_hat,s=s_hat,nloptr_fit = out)))
 
@@ -84,7 +92,7 @@ pois_mean_penalized_compound = function(x,
 }
 
 
-#'objective function, sum over h_i()
+#'@title objective function, sum over h_i()
 #'@param params (z,s2,a,mu)
 #'@param y data vector
 #'@param grid prior sds
@@ -105,6 +113,7 @@ h_obj_calc = function(z,s,w,mu,y,grid){
   return(sum(exp(theta)-y*theta-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(s^2)/2))
 }
 
+#'@title gradient of objective
 #'@return the gradient of objective function
 h_obj_grad = function(params,y,grid){
   n = length(y)
@@ -122,7 +131,7 @@ h_obj_grad_calc = function(z,s,v,w,a,mu,y,grid){
   return(c(h_obj_d1_z_calc(z,s,w,mu,y,grid),h_obj_d1_s2_calc(z,s,w,mu,y,grid)*exp(v),h_obj_d1_g_calc(z,s,a,mu,y,grid)))
 }
 
-#'objective function derivative wrt z
+#'@title objective function derivative wrt z
 #'@param params (z,s2,a,mu)
 #'@param y data vector
 #'@param grid prior sds
@@ -144,7 +153,7 @@ h_obj_d1_z_calc = function(z,s,w,mu,y,grid){
   return(-(y-exp(theta))*(1+s^2*l_dz2)-l_dz-(theta-z)*l_dz2)
 }
 
-#'objective function derivative wrt s2
+#'@title objective function derivative wrt s2
 #'@param theta (z,s2,a)
 #'@param y data vector
 #'@param grid prior sds
@@ -169,7 +178,7 @@ h_obj_d1_s2_calc = function(z,s,w,mu,y,grid){
   return(-(y-exp(theta))*S_ds2-l_ds2-(theta-z)*S_ds2/s^2+(theta-z)^2/2/s^4-1/2/s^2)
 }
 
-#'objective function derivative wrt a
+#'@title objective function derivative wrt a
 #'@param theta (z,s2,a)
 #'@param y data vector
 #'@param grid prior sds

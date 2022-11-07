@@ -122,15 +122,22 @@ gen_data_log_link = function(n=1e3,n_simu=100,w=0.8,
 
 #'@title run the algorithms
 #'@import parallel
+#'@import ebpm
+#'@import ashr
 #'@export
 simu_study_poisson_mean = function(sim_data,
                                    ebnm_params = list(prior_family='normal_scale_mixture'),
                                    tol=1e-5,maxiter=2e3,n_cores = 10,
                                    method_list = c('GG','GMG','GMGM',
+                                                   'GMGM_pointmass',
                                                    'nb_lb','nb_pg',
                                                    'log1exp','split','split_mixture',
                                                    'penalty_compound',
-                                                   'penalty_inversion'),
+                                                   'penalty_inversion',
+                                                   'ash_pois_identity',
+                                                   'ash_pois_log',
+                                                   'ebpm_gamma',
+                                                   'ebpm_exp_mixture'),
                                    save_data = TRUE){
   X = sim_data$X
   #Mean,log_Mean
@@ -154,18 +161,23 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('GMGM'%in%method_list){
-      res_GMGM = try(pois_mean_GMGM(X[i,],tol=tol,maxiter = maxiter))
+      res_GMGM = try(pois_mean_GMGM(X[i,],tol=tol,maxiter = maxiter,point_mass = F))
       fitted_model$GMGM = res_GMGM
+    }
+
+    if('GMGM_pointmass'%in%method_list){
+      res_GMGM_pointmass = try(pois_mean_GMGM(X[i,],tol=tol,maxiter = maxiter,point_mass = T))
+      fitted_model$GMGM_pointmass = res_GMGM_pointmass
     }
 
 
     if('nb_lb'%in%method_list){
-      res_nb_lb = try(nb_mean_lower_bound(X[i,],r=max(1e2,2*max(X[i,])),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
+      res_nb_lb = try(nb_mean_lower_bound(X[i,],r=2*max(X[i,]),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
       fitted_model$nb_lb = res_nb_lb
     }
 
     if('nb_pg'%in%method_list){
-      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=max(1e2,2*max(X[i,])),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
+      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=2*max(X[i,]),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
       fitted_model$nb_pg = res_nb_pg
     }
 
@@ -194,20 +206,59 @@ simu_study_poisson_mean = function(sim_data,
       fitted_model$penalty_inversion = res_inversion
     }
 
+    if('ash_pois_identity'%in%method_list){
+      res_ash_pois_identity = try(ash_pois(X[i,],link='identity'))
+      res_ash_pois_identity$posterior = list(mean=res_ash_pois_identity$result$PosteriorMean,mean_log=log(res_ash_pois_identity$result$PosteriorMean))
+      fitted_model$ash_pois_identity = res_ash_pois_identity
+    }
+
+    if('ash_pois_log'%in%method_list){
+      res_ash_pois_log = try(ash_pois(X[i,],link='log'))
+      res_ash_pois_log$posterior = list(mean=res_ash_pois_log$result$PosteriorMean,mean_log=log(res_ash_pois_log$result$PosteriorMean))
+      fitted_model$ash_pois_log = res_ash_pois_log
+    }
+
+    if('ebpm_gamma'%in%method_list){
+      res_ebpm_gamma = try(ebpm_gamma(X[i,]))
+      fitted_model$ebpm_gamma = res_ebpm_gamma
+    }
+
+    if('ebpm_exp_mixture'%in%method_list){
+      res_ebpm_exp_mixture = try(ebpm_exponential_mixture(X[i,]))
+      fitted_model$ebpm_exp_mixture = res_ebpm_exp_mixture
+    }
+
     MSE_mean = simplify2array(lapply(fitted_model,function(x){
-      mse(x$posterior$posteriorMean_mean,sim_data$Mean[i,])
+      if(class(x)!='try-error'){
+        mse(x$posterior$mean,sim_data$Mean[i,])
+      }else{
+        NA
+      }
+
     }))
 
     MAE_mean = simplify2array(lapply(fitted_model,function(x){
-      mae(x$posterior$posteriorMean_mean,sim_data$Mean[i,])
+      if(class(x)!='try-error'){
+      mae(x$posterior$mean,sim_data$Mean[i,])
+      }else{
+        NA
+      }
     }))
 
     MSE_log_mean = simplify2array(lapply(fitted_model,function(x){
-      mse(x$posterior$posteriorMean_mean,sim_data$log_Mean[i,])
+      if(class(x)!='try-error'){
+      mse(x$posterior$mean_log,sim_data$log_Mean[i,])
+      }else{
+        NA
+      }
     }))
 
     MAE_log_mean = simplify2array(lapply(fitted_model,function(x){
-      mae(x$posterior$posteriorMean_mean,sim_data$log_Mean[i,])
+      if(class(x)!='try-error'){
+      mae(x$posterior$mean_log,sim_data$log_Mean[i,])
+      }else{
+        NA
+      }
     }))
 
 

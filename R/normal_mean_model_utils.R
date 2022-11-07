@@ -1,4 +1,4 @@
-#'log marginal likelihood of normal mean model
+#'@title log marginal likelihood of normal mean model
 #'@param x data vector of length n
 #'@param s standard error
 #'@param w prior weights
@@ -9,6 +9,7 @@ l_nm = function(x,s,w,mu,grid){
   return(log(f_nm(x,s,w,mu,grid)))
 }
 
+#'@title calc normal density of x, mixture
 #'@return a n by K matrix of normal density
 nm_density = function(x,s,mu,grid){
   K = length(grid)
@@ -20,6 +21,7 @@ nm_density = function(x,s,mu,grid){
   return(dnorm(outer(x,rep(1,K),FUN="*"),mu,sdmat))
 }
 
+#'@title gmm likelihood
 #'@return a vector of likelihood, of length n
 f_nm = function(x,s,w,mu,grid){
   temp = c(nm_density(x,s,mu,grid)%*%w)
@@ -39,24 +41,28 @@ f_nm = function(x,s,w,mu,grid){
 #   f_d1/f
 # }
 
+#'@title gmm likelihood derivative wrt z
 #'@return a vector of gradient df/dz, length n
 f_nm_d1_z = function(x,s,w,mu,grid){
   vmat = outer(s^2,grid^2,FUN="+")
   return(c(-(nm_density(x,s,mu,grid)/vmat*(x-mu))%*%w))
 }
 
+#'@title gmm likelihood 2nd derivative wrt z
 #'@return a vector of second derivative d^2f/dz^2, length n
 f_nm_d2_z = function(x,s,w,mu,grid){
   vmat = outer(s^2,grid^2,FUN="+")
   return(c((nm_density(x,s,mu,grid)*((x-mu)^2/vmat^2-1/vmat))%*%w))
 }
 
+#'@title gmm likelihood 3rd derivative wrt z
 #'@return a vector of third derivative d^3f/dz^3, length n
 f_nm_d3_z = function(x,s,w,mu,grid){
   vmat = outer(s^2,grid^2,FUN="+")
   return(c((nm_density(x,s,mu,grid)*(3*(x-mu)/vmat^2-(x-mu)^3/vmat^3))%*%w))
 }
 
+#'@title gmm log-likelihood derivative wrt z
 #'@return a vector of derivative dl_nm/dz, length n
 l_nm_d1_z = function(x,s,w,mu,grid){
   if(length(s)==1){
@@ -70,6 +76,7 @@ l_nm_d1_z = function(x,s,w,mu,grid){
   }
 }
 
+#'@title gmm log-likelihood 2nd derivative wrt z
 #'@return a vector of second derivative d^2l_nm/dz^2, length n
 l_nm_d2_z = function(x,s,w,mu,grid){
   if(length(s)==1){
@@ -83,6 +90,7 @@ l_nm_d2_z = function(x,s,w,mu,grid){
   }
 }
 
+#'@title gmm log-likelihood 3rd derivative wrt z
 #'@return a vector of third derivative d^3l_nm/dz^3, length n
 l_nm_d3_z = function(x,s,w,mu,grid){
   if(length(s)==1){
@@ -97,6 +105,7 @@ l_nm_d3_z = function(x,s,w,mu,grid){
 
 }
 
+#'@title gmm likelihood derivative wrt s2
 #'@return a vector of derivative df_nm/ds2, length n
 f_nm_d1_s2 = function(x,s,w,mu,grid){
   K = length(grid)
@@ -105,6 +114,7 @@ f_nm_d1_s2 = function(x,s,w,mu,grid){
   return(c((nm_density(x,s,mu,grid)/vmat^2*((xmat-mu)^2-vmat))%*%w/2))
 }
 
+#'@title gmm likelihood derivative wrt z,s2
 #'@return a vector of second derivative d^2f_nm/dzds2, length n
 f_nm_d2_zs2 = function(x,s,w,mu,grid){
   K = length(grid)
@@ -113,6 +123,7 @@ f_nm_d2_zs2 = function(x,s,w,mu,grid){
   return(c(((xmat-mu)*(3*vmat-(xmat-mu)^2)/vmat^3.5*exp(-(xmat-mu)^2/2/vmat))%*%w/2/sqrt(2*pi)))
 }
 
+#'@title gmm log-likelihood derivative wrt s2
 #'@return a vector of derivative dl_nm/ds2, length n
 l_nm_d1_s2 = function(x,s,w,mu,grid){
   temp = f_nm(x,s,w,mu,grid)
@@ -123,6 +134,7 @@ l_nm_d1_s2 = function(x,s,w,mu,grid){
   }
 }
 
+#'@title gmm log-likelihood derivative wrt z,s2
 #'@return a vector of second derivative d^2l_nm/dzds2, length n
 l_nm_d2_zs2 = function(x,s,w,mu,grid){
   temp = f_nm(x,s,w,mu,grid)
@@ -133,7 +145,7 @@ l_nm_d2_zs2 = function(x,s,w,mu,grid){
   }
 }
 
-
+#'@title gmm likelihood derivative wrt a
 #'@return a matrix of gradient, size n* K
 f_nm_d1_a = function(x,s,a,mu,grid){
   n = length(x)
@@ -141,6 +153,7 @@ f_nm_d1_a = function(x,s,a,mu,grid){
   return((dens_mat*sum(exp(a)) - c(dens_mat%*%exp(a)))*outer(rep(1,n),exp(a))/sum(exp(a))^2)
 }
 
+#'@title gmm likelihood derivative wrt z,a
 #'@return a matrix of gradient, size n*K
 f_nm_d2_za = function(x,s,a,mu,grid){
   K = length(grid)
@@ -153,6 +166,7 @@ f_nm_d2_za = function(x,s,a,mu,grid){
 
 }
 
+#'@title gmm log-likelihood derivative wrt a
 #'@return a matrix of gradient, size n*K
 l_nm_d1_a = function(x,s,a,mu,grid){
   w = softmax(a)
@@ -165,6 +179,7 @@ l_nm_d1_a = function(x,s,a,mu,grid){
 
 }
 
+#'@title gmm log-likelihood derivative wrt z,a
 #'@return a matrix of gradient, size n*K
 l_nm_d2_za = function(x,s,a,mu,grid){
   w = softmax(a)
@@ -176,24 +191,21 @@ l_nm_d2_za = function(x,s,a,mu,grid){
   }
 }
 
+#'@title gmm likelihood derivative wrt prior mean mu
 #'@return gradient w.r.t prior mean, a scalar
 f_nm_d1_mu = function(x,s,w,mu,grid){
   vmat = outer(s^2,grid^2,FUN="+")
   return((c((nm_density(x,s,mu,grid)/vmat*(x-mu))%*%w)))
 }
 
-#' #'@return gradient w.r.t prior mean, a vector, do not sum over observations
-#' f_nm_d1_mu_1by1 = function(x,s,w,mu,grid){
-#'   vmat = outer(s^2,grid^2,FUN="+")
-#'   return((c((nm_density(x,s,mu,grid)/vmat*(x-mu))%*%w)))
-#' }
-
+#'@title gmm likelihood derivative wrt z,mu
 #'@return a vector gradient
 f_nm_d2_zmu = function(x,s,w,mu,grid){
   vmat = outer(s^2,grid^2,FUN="+")
   return(c((nm_density(x,s,mu,grid)*(-(x-mu)^2/vmat^2+1/vmat))%*%w))
 }
 
+#'@title gmm log-likelihood derivative wrt mu
 l_nm_d1_mu = function(x,s,w,mu,grid){
   if(length(s)==1){
     s = rep(s,length(x))
@@ -207,6 +219,7 @@ l_nm_d1_mu = function(x,s,w,mu,grid){
 
 }
 
+#'@title gmm log-likelihood derivative wrt z,mu
 l_nm_d2_zmu = function(x,s,w,mu,grid){
   if(length(s)==1){
     s = rep(s,length(x))
@@ -219,23 +232,27 @@ l_nm_d2_zmu = function(x,s,w,mu,grid){
   }
 }
 
+#'@title gmm log-likelihood derivative wrt theta, the posterior mean
 #'@return derivative of l_nm(z(theta);g,s^2(theta)) w.r.t theta
 l_nm_d1_theta = function(z,theta,s,w,mu,grid){
   l_nm_d1_z(z,s,w,mu,grid)*z_d1_theta(z,theta,s,w,mu,grid) + l_nm_d1_s2(z,s,w,mu,grid)*(-exp(-theta))
 }
 
+#'@title derivative z wrt theta when z (and s2) is a function of theta.
 z_d1_theta = function(z,theta,s,w,mu,grid){
   numerator = 1-(-exp(-theta))*l_nm_d1_z(z,s,w,mu,grid) - exp(-theta)*(-exp(-theta))*l_nm_d2_zs2(z,s,w,mu,grid)
   denominator = 1 + exp(-theta)*l_nm_d2_z(z,s,w,mu,grid)
   return(numerator/denominator)
 }
 
+#'@title gmm log-lik derivative of prior
 #'@return derivative of l_nm(z(theta);g,s^2(theta)) w.r.t prior (a,mu)
 l_nm_d1_g = function(z,theta,s,a,mu,grid){
   w=softmax(a)
   l_nm_d1_z(z,s,w,mu,grid)*z_d1_g(z,theta,s,a,mu,grid) + cbind(l_nm_d1_a(z,s,a,mu,grid),l_nm_d1_mu(z,s,w,mu,grid))
 }
 
+#'@title derivative z wrt prior
 z_d1_g = function(z,theta,s,a,mu,grid){
   w=softmax(a)
   n_a = -s^2*(l_nm_d2_za(z,s,a,mu,grid))
@@ -245,6 +262,7 @@ z_d1_g = function(z,theta,s,a,mu,grid){
   return(cbind(n_a/d_a,n_mu/d_mu))
 }
 
+#'@title softmax function
 softmax = function(a){
   exp(a-max(a))/sum(exp(a-max(a)))
 }
@@ -298,6 +316,7 @@ PV = function(x,s,w,mu,grid){
   return(1+s^2*l_nm_d2_z(x,s,w,mu,grid))
 }
 
+#'@title objective function for solving S(z)=theta
 S_inv_obj = function(z,theta,s,w,mu,grid){
   return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
 }
@@ -317,6 +336,7 @@ S_inv_obj = function(z,theta,s,w,mu,grid){
 # S_inv_obj_jac(x,theta,s,w,mu0,sigma2k)
 # S_inv2(theta,s,w,mu0,sigma2k)
 
+#'@title jacobian of  objective function for solving S(z)=theta
 S_inv_obj_jac = function(z,theta,s,w,mu,grid){
   return(diag(c(1+s^2*l_nm_d2_z(z,s,w,mu,grid))))
 }
@@ -335,7 +355,7 @@ S_inv_obj_jac = function(z,theta,s,w,mu,grid){
 # [1] NaN
 
 #'@title bisection for root finding. Vectorized
-#'@description from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
+#'@description modified from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
 bisection= function(f, lower, upper, ...,
                     maxiter =100,
                     tol = 1e-8,
@@ -421,9 +441,8 @@ S_inv = function(theta,s,w,mu,grid){
 }
 
 
-#' #' I tried supply the Jacobin matrix but there's always an error says singular matrix. But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
-#' #' rootSolve
-#' #' nleqslv
+#' I tried supply the Jacobin matrix but there's always an error says singular matrix.
+#' But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
 #' S_inv = function(theta,s,w,mu,grid){
 #'   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
 #'     return(rep(mu,length(theta)))
