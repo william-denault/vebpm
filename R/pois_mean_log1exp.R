@@ -80,27 +80,47 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
   #return(list(posteriorMean=m,posteriorVar=v,obj_value=obj,ebnm_res=res,kappa=kapa))
 }
 
-log1exp = function(x){
-  # log(1+exp(40)) == 40 is TRUE
-  # log(1+exp(-40)) == 0 is TRUE
-  if(x<40){
-    if(x>-40){
-      return(log(1+exp(x)))
-    }else{
-      return(0)
-    }
-  }else{
-    return(x)
+#'@title calc log(1+exp(x))
+#'@description from package `qgam`
+log1pexp = function (x){
+  indx <- .bincode(x, c(-Inf, -37, 18, 33.3, Inf), right = TRUE,
+                   include.lowest = TRUE)
+  kk <- which(indx == 1)
+  if (length(kk)) {
+    x[kk] <- exp(x[kk])
   }
+  kk <- which(indx == 2)
+  if (length(kk)) {
+    x[kk] <- log1p(exp(x[kk]))
+  }
+  kk <- which(indx == 3)
+  if (length(kk)) {
+    x[kk] <- x[kk] + exp(-x[kk])
+  }
+  return(x)
 }
 
+# log1exp = function(x){
+#   # log(1+exp(40)) == 40 is TRUE
+#   # log(1+exp(-40)) == 0 is TRUE
+#   if(x<40){
+#     if(x>-40){
+#       return(log(1+exp(x)))
+#     }else{
+#       return(0)
+#     }
+#   }else{
+#     return(x)
+#   }
+# }
+
 nll = function(x,mu){
-  return(log(1+exp(mu))-x*log(log(1+exp(mu))))
+  return(log1pexp(mu)-x*log(log1pexp(mu)))
 }
 
 nll_d1 = function(x,mu){
-  n = exp(mu)*(log(1+exp(mu))-x)
-  d = (1+exp(mu))*log(1+exp(mu))
+  n = (log1pexp(mu)-x)
+  d = (1+exp(-mu))*log1pexp(mu)
   return(n/d)
 }
 
