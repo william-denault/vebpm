@@ -83,6 +83,9 @@ pois_mean_GMG = function(x,
     w = rep(1/K,K)
   }
 
+  # const in objective function
+  const = sum((x-1)*log(s)) - sum(lfactorial(x))
+
   qz = matrix(0,nrow=n,ncol=K)
 
   obj = rep(0,maxiter+1)
@@ -123,7 +126,7 @@ pois_mean_GMG = function(x,
     w = pmax(w, 1e-15)
 
     #print(w)
-    obj[iter+1] = pois_mean_GMG_obj(x,s,m,v,w,beta,Sigma2k,qz)
+    obj[iter+1] = pois_mean_GMG_obj(x,s,m,v,w,beta,Sigma2k,qz,const)
     if((obj[iter+1] - obj[iter])<tol){
       obj = obj[1:(iter+1)]
       break
@@ -142,13 +145,13 @@ pois_mean_GMG = function(x,
 
 }
 #'calculate objective function
-pois_mean_GMG_obj = function(x,s,m,s2,w,beta,Sigma2k,qz){
+pois_mean_GMG_obj = function(x,s,m,s2,w,beta,Sigma2k,qz,const){
   n = length(x)
   K = length(w)
   W = matrix(w,nrow=n,ncol=K,byrow=T)
   M = matrix(m,nrow=n,ncol=K,byrow=F)
   S2 = matrix(s2,nrow=n,ncol=K,byrow=F)
-  return(sum(x*m-s*exp(m+s2/2))+sum(qz*(log(W)-log(Sigma2k)/2-(M^2+S2-2*M*beta+beta^2)/2/Sigma2k))-sum(qz*log(qz))+sum(log(s2))/2)
+  return(sum(x*m-s*exp(m+s2/2))+sum(qz*(log(W)-log(Sigma2k)/2-(M^2+S2-2*M*beta+beta^2)/2/Sigma2k))-sum(qz*log(qz))+sum(log(s2))/2+const)
 }
 
 #' calc obj for optim

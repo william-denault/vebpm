@@ -93,7 +93,7 @@ f_obj = function(params,y,grid){
   mu = params[n+K+1]
   s = sqrt(exp(-theta))
   z = S_inv(theta,s,w,mu,grid)
-  val = sum(-y*theta+exp(theta)-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(2*pi*s^2)/2)
+  val = sum(-y*theta+exp(theta)+lfactorial(y)-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(2*pi*s^2)/2)
   #print(theta)
   #print(l_nm(z,s,w,mu,grid))
   #z = S_inv(theta,s,w,mu,grid,z_range)

@@ -122,8 +122,9 @@ gen_data_log_link = function(n=1e3,n_simu=100,w=0.8,
 
 #'@title run the algorithms
 #'@import parallel
-#'@import ebpm
-#'@import ashr
+#'@importFrom ebpm ebpm_gamma
+#'@importFrom ebpm ebpm_exponential_mixture
+#'@importFrom ashr ash_pois
 #'@export
 simu_study_poisson_mean = function(sim_data,
                                    ebnm_params = list(prior_family='normal_scale_mixture'),

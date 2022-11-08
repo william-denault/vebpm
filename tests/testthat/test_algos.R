@@ -16,7 +16,7 @@ res_split = (pois_mean_split(x,tol=tol,maxiter = maxiter,ebnm_params = ebnm_para
 res_split_mixture = (pois_mean_split_mixture(x,tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
 
 res_compound = (pois_mean_penalized_compound(x))
-res_inversion = (pois_mean_penalized_inversion(x))
+res_inversion = pois_mean_penalized_inversion(x,tol=1e-4)
 
 
 

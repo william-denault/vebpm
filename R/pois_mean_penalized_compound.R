@@ -110,7 +110,7 @@ h_obj = function(params,y,grid){
 
 h_obj_calc = function(z,s,w,mu,y,grid){
   theta = S(z,s,w,mu,grid)
-  return(sum(exp(theta)-y*theta-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(s^2)/2))
+  return(sum(exp(theta)-y*theta+lfactorial(y)-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(s^2)/2))
 }
 
 #'@title gradient of objective

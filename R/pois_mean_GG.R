@@ -69,6 +69,8 @@ pois_mean_GG = function(x,
       sigma2=prior_var
     }
 
+    const = sum((x-1)*log(s)) - sum(lfactorial(x))
+
     obj = rep(0,maxiter+1)
     obj[1] = -Inf
     for(iter in 1:maxiter){
@@ -94,7 +96,7 @@ pois_mean_GG = function(x,
                   method = optim_method)
       m = opt$par[1:n]
       v = exp(opt$par[(n+1):(2*n)])
-      obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v)
+      obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
       if((obj[iter+1] - obj[iter])<tol){
         obj = obj[1:(iter+1)]
         break
@@ -120,7 +122,7 @@ pois_mean_GG = function(x,
                 method = optim_method)
     m = opt$par[1:n]
     v = exp(opt$par[(n+1):(2*n)])
-    obj = pois_mean_GG_obj(x,s,prior_mean,prior_var,m,v)
+    obj = pois_mean_GG_obj(x,s,prior_mean,prior_var,m,v,const)
 
   }
 
@@ -153,8 +155,8 @@ pois_mean_GG_opt_obj_gradient = function(theta,x,s,beta,sigma2,n){
 }
 
 
-pois_mean_GG_obj = function(x,s,beta,sigma2,m,v){
-  return(sum(x*m-s*exp(m+v/2)-log(sigma2)/2-(m^2+v-2*m*beta+beta^2)/2/sigma2+log(v)/2))
+pois_mean_GG_obj = function(x,s,beta,sigma2,m,v,const){
+  return(sum(x*m-s*exp(m+v/2)-log(sigma2)/2-(m^2+v-2*m*beta+beta^2)/2/sigma2+log(v)/2)+const)
 }
 
 #' #'@param x a data point

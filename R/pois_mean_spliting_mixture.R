@@ -70,6 +70,7 @@ pois_mean_split_mixture = function(x,s=NULL,
     w = rep(1/K,K)
   }
 
+  const = sum((x-1)*log(s)) - sum(lfactorial(x))
   b_pm = rep(0,n)
   b_pv = rep(1/n,n)
   M = matrix(log(1+x),nrow=n,ncol=K,byrow = F)
@@ -102,6 +103,7 @@ pois_mean_split_mixture = function(x,s=NULL,
                   beta=b_pm,
                   sigma2=sigma2k[k],
                   n=n,
+                  #const=const,
                   method = optim_method)
       M[,k] = opt$par[1:n]
       V[,k] = exp(opt$par[(n+1):(2*n)])
@@ -135,7 +137,7 @@ pois_mean_split_mixture = function(x,s=NULL,
 
     # ELBO
     lW = matrix(log(w),nrow=n,ncol=K,byrow=T)
-    obj[iter+1] = sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*b_pm+matrix(b_pm^2+b_pv,nrow=n,ncol=K,byrow=F))/2/Sigma2k-log(qz)+log(V)/2)) + H
+    obj[iter+1] = sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*b_pm+matrix(b_pm^2+b_pv,nrow=n,ncol=K,byrow=F))/2/Sigma2k-log(qz)+log(V)/2)) + H + const
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
       break

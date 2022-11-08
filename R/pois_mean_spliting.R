@@ -50,6 +50,9 @@ pois_mean_split = function(x,s=NULL,
     s = rep(s,n)
   }
 
+  # const in objective function
+  const = sum((x-1)*log(s)) - sum(lfactorial(x))
+
   b_pm = rep(0,n)
   #b_pv = rep(1/n,n)
   mu_pm = log(1+x)
@@ -74,6 +77,7 @@ pois_mean_split = function(x,s=NULL,
                 beta=b_pm,
                 sigma2=sigma2,
                 n=n,
+                #const=const,
                 method = optim_method)
     mu_pm = opt$par[1:n]
     mu_pv = exp(opt$par[(n+1):(2*n)])
@@ -95,7 +99,7 @@ pois_mean_split = function(x,s=NULL,
     sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
 
     # ELBO
-    obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) - sum(lfactorial(x)) - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
+    obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
       break

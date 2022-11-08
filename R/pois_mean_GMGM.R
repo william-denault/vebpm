@@ -89,6 +89,8 @@ pois_mean_GMGM = function(x,
       w0=0
     }
   }
+  # const in objective function
+  const = sum((x-1)*log(s)) - sum(lfactorial(x))
 
   qz = matrix(0,nrow=n,ncol=K)
   qz0 = rep(0,n)
@@ -119,6 +121,7 @@ pois_mean_GMGM = function(x,
                   beta=beta,
                   sigma2=sigma2k[k],
                   n=n,
+                  #const=const,
                   method = optim_method)
       M[,k] = opt$par[1:n]
       V[,k] = exp(opt$par[(n+1):(2*n)])
@@ -156,7 +159,7 @@ pois_mean_GMGM = function(x,
     w0 = pmax(w0,1e-15)
 
 
-    obj[iter+1] = pois_mean_GMGM_obj(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0)
+    obj[iter+1] = pois_mean_GMGM_obj(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0,const)
     if((obj[iter+1] - obj[iter])<tol){
       obj = obj[1:(iter+1)]
       break
@@ -181,14 +184,15 @@ pois_mean_GMGM = function(x,
 
 }
 
-pois_mean_GMGM_obj = function(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0){
+pois_mean_GMGM_obj = function(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0,const){
   n = dim(X)[1]
   K = length(w)
   lW = matrix(log(w),nrow=n,ncol=K,byrow=T)
+
   if(point_mass){
-    return(sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/2/Sigma2k-log(qz)+log(V)/2)) + sum(qz0*(x*beta-s*exp(beta)))+sum(qz0*log(w0))-sum(qz0*log(qz0)))
+    return(sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/2/Sigma2k-log(qz)+log(V)/2)) + sum(qz0*(x*beta-s*exp(beta)))+sum(qz0*log(w0))-sum(qz0*log(qz0))+ const)
   }else{
-    return(sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/2/Sigma2k-log(qz)+log(V)/2)))
+    return(sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/2/Sigma2k-log(qz)+log(V)/2))+const)
   }
 
 }

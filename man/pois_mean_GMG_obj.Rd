@@ -4,7 +4,7 @@
 \alias{pois_mean_GMG_obj}
 \title{calculate objective function}
 \usage{
-pois_mean_GMG_obj(x, s, m, s2, w, beta, Sigma2k, qz)
+pois_mean_GMG_obj(x, s, m, s2, w, beta, Sigma2k, qz, const)
 }
 \description{
 calculate objective function
