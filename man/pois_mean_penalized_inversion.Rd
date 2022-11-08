@@ -11,6 +11,7 @@ pois_mean_penalized_inversion(
   mixsd = NULL,
   point_mass = TRUE,
   optim_method = "L-BFGS-B",
+  tol = 1e-08,
   maxiter = 1000,
   verbose = FALSE
 )
@@ -26,9 +27,9 @@ pois_mean_penalized_inversion(
 
 \item{optim_method}{optimization method in `optim` function}
 
-\item{maxiter}{max number of iterations}
-
 \item{tol}{tolerance for stopping the updates}
+
+\item{maxiter}{max number of iterations}
 }
 \value{
 a list of

@@ -2,11 +2,7 @@
 % Please edit documentation in R/normal_mean_model_utils.R
 \name{f_nm_d2_zmu}
 \alias{f_nm_d2_zmu}
-\title{#'@return gradient w.r.t prior mean, a vector, do not sum over observations
-f_nm_d1_mu_1by1 = function(x,s,w,mu,grid){
-  vmat = outer(s^2,grid^2,FUN="+")
-  return((c((nm_density(x,s,mu,grid)/vmat*(x-mu))%*%w)))
-}}
+\title{gmm likelihood derivative wrt z,mu}
 \usage{
 f_nm_d2_zmu(x, s, w, mu, grid)
 }
@@ -14,9 +10,5 @@ f_nm_d2_zmu(x, s, w, mu, grid)
 a vector gradient
 }
 \description{
-#'@return gradient w.r.t prior mean, a vector, do not sum over observations
-f_nm_d1_mu_1by1 = function(x,s,w,mu,grid){
-  vmat = outer(s^2,grid^2,FUN="+")
-  return((c((nm_density(x,s,mu,grid)/vmat*(x-mu))%*%w)))
-}
+gmm likelihood derivative wrt z,mu
 }

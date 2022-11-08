@@ -28,6 +28,7 @@ pois_mean_penalized_inversion = function(x,
                                          mixsd=NULL,
                                          point_mass = TRUE,
                                          optim_method = 'L-BFGS-B',
+                                         tol=1e-8,
                                          maxiter = 1000,
                                          verbose=FALSE){
   ##########
@@ -63,7 +64,7 @@ pois_mean_penalized_inversion = function(x,
 
   fit = optim(c(log(x+1),w,beta),f_obj,f_obj_grad,
               method = optim_method,y=x,grid=mixsd,
-              control=list(trace=verbose,maxit=maxiter,factr=1e11))
+              control=list(trace=verbose,maxit=maxiter,factr=tol/.Machine$double.eps))
 
   m = fit$par[1:n]
   w_hat = softmax(fit$par[(n+1):(n+K)])
