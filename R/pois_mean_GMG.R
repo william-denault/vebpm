@@ -53,8 +53,9 @@ pois_mean_GMG = function(x,
 
 
   if(is.null(mixsd)){
-    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    #sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
     #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
+    sigma2k = select_mixsd(x,s)^2
     if(min(sigma2k)>1e-4){
       sigma2k =c(1e-4,sigma2k)
     }
@@ -105,7 +106,7 @@ pois_mean_GMG = function(x,
     #   v[i] = temp$s2
     # }
 
-    opt = optim(c(m,v),
+    opt = optim(c(m,log(v)),
                 fn = pois_mean_GMG_opt_obj,
                 gr = pois_mean_GMG_opt_obj_gradient,
                 x=x,

@@ -57,10 +57,11 @@ pois_mean_GMGM = function(x,
 
     ## how to choose grid in this case?
     ## use ebnm method
-    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    #sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
     #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=beta)[-1])^2
     #sigma2k = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #sigma2k = c(1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
+    sigma2k = select_mixsd(x,s)^2
   }else{
     sigma2k = mixsd^2
   }
@@ -99,21 +100,9 @@ pois_mean_GMGM = function(x,
   obj[1] = -Inf
 
   for(iter in 1:maxiter){
-
-    # #update posterior mean, variances
-    # # this can be paralleled?
-    # # this is too slow, need a vectorized version
-    # for(i in 1:n){
-    #   for (k in 1:K) {
-    #     temp = pois_mean_GG1(x[i],s[i],beta,sigma2k[k],optim_method,M[i,k],V[i,k])
-    #     M[i,k] = temp$m
-    #     V[i,k] = temp$v
-    #   }
-    # }
-
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = vga_optimize(c(M[,k],V[,k]),x,s,beta,sigma2k[k])
+      opt = vga_optimize(c(M[,k],log(V[,k])),x,s,beta,sigma2k[k])
       M[,k] = opt$m
       V[,k] = opt$v
     }

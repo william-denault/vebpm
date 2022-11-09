@@ -75,8 +75,8 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
   }
   return(list(posterior = list(mean_latent = m,
                                var_latent = v,
-                               mean = log(1+exp(m)),
-                               mean_log = log(log(1+exp(m)))),
+                               mean = log1pexp(m),
+                               mean_log = log(log1pexp(m))),
               fitted_g = res$fitted_g,
               elbo=obj[length(obj)],
               obj_trace = obj,

@@ -56,7 +56,8 @@ pois_mean_split_mixture = function(x,s=NULL,
     ## how to choose grid in this case?
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #sigma2k = (ebnm:::default_smn_scale(log(x/s+1),sqrt(1/(x/s+1)),mode=log(sum(x)/sum(s)))[-1])^2
-    sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    #sigma2k = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')^2
+    sigma2k = select_mixsd(x,s)^2
     if(min(sigma2k)>1e-4){
       sigma2k =c(1e-4,sigma2k)
     }
@@ -85,7 +86,7 @@ pois_mean_split_mixture = function(x,s=NULL,
   for (iter in 1:maxiter) {
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = vga_optimize(c(M[,k],V[,k]),x,s,b_pm,sigma2k[k])
+      opt = vga_optimize(c(M[,k],log(V[,k])),x,s,b_pm,sigma2k[k])
       M[,k] = opt$m
       V[,k] = opt$v
     }
