@@ -153,6 +153,9 @@ pois_mean_GMGM = function(x,
     obj[iter+1] = pois_mean_GMGM_obj(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0,const)
     if((obj[iter+1] - obj[iter])<tol){
       obj = obj[1:(iter+1)]
+      if((obj[iter+1]-obj[iter])<0){
+        warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+      }
       break
     }
 

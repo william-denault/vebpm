@@ -17,21 +17,35 @@ vga_optimize = function(init_val,x,s,beta,sigma2,method='lbfgs'){
               #const=const,
               method = 'L-BFGS-B'),silent = TRUE)
   if(class(opt)=='try-error'){
-    opt = optim(init_val,
-                fn = pois_mean_GG_opt_obj0,
-                gr = pois_mean_GG_opt_obj_gradient0,
-                x=x,
-                s=s,
-                beta=beta,
-                sigma2=sigma2,
-                n=n,
-                #const=const,
-                method = 'L-BFGS-B',
-                lower=c(rep(-Inf,n),rep(1e-10,n)))
-    return(list(m=opt$par[1:n],v=(opt$par[(n+1):(2*n)]),opt=opt))
-  }else{
-    return(list(m=opt$par[1:n],v=exp(opt$par[(n+1):(2*n)]),opt=opt))
+    opt = optim(c(rep(0,n),rep(1,n)),
+                    fn = pois_mean_GG_opt_obj,
+                    gr = pois_mean_GG_opt_obj_gradient,
+                    x=x,
+                    s=s,
+                    beta=beta,
+                    sigma2=sigma2,
+                    n=n,
+                    #const=const,
+                    method = 'L-BFGS-B',
+                control = list(factr = 1e5))
   }
+  return(list(m=opt$par[1:n],v=exp(opt$par[(n+1):(2*n)]),opt=opt))
+  # if(class(opt)=='try-error'){
+  #   opt = optim(init_val,
+  #               fn = pois_mean_GG_opt_obj0,
+  #               gr = pois_mean_GG_opt_obj_gradient0,
+  #               x=x,
+  #               s=s,
+  #               beta=beta,
+  #               sigma2=sigma2,
+  #               n=n,
+  #               #const=const,
+  #               method = 'L-BFGS-B',
+  #               lower=c(rep(-Inf,n),rep(1e-10,n)))
+  #   return(list(m=opt$par[1:n],v=(opt$par[(n+1):(2*n)]),opt=opt))
+  # }else{
+  #   return(list(m=opt$par[1:n],v=exp(opt$par[(n+1):(2*n)]),opt=opt))
+  # }
 
 
 }

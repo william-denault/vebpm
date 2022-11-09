@@ -105,6 +105,9 @@ pois_mean_split = function(x,s=NULL,
     obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
+      if((obj[iter+1]-obj[iter])<0){
+        warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+      }
       break
     }
 

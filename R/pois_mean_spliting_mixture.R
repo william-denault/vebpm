@@ -121,6 +121,9 @@ pois_mean_split_mixture = function(x,s=NULL,
     obj[iter+1] = sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*b_pm+matrix(b_pm^2+b_pv,nrow=n,ncol=K,byrow=F))/2/Sigma2k-log(qz)+log(V)/2)) + H + const
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
+      if((obj[iter+1]-obj[iter])<0){
+        warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+      }
       break
     }
 
