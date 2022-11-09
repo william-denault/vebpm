@@ -106,7 +106,7 @@ pois_mean_GMG = function(x,
     #   v[i] = temp$s2
     # }
 
-    opt = optim(c(m,log(v)),
+    opt = try(optim(c(m,log(v)),
                 fn = pois_mean_GMG_opt_obj,
                 gr = pois_mean_GMG_opt_obj_gradient,
                 x=x,
@@ -115,9 +115,16 @@ pois_mean_GMG = function(x,
                 beta=beta,
                 Sigma2k=Sigma2k,
                 n=n,
-                method = optim_method)
-    m = opt$par[1:n]
-    v = exp(opt$par[(n+1):(2*n)])
+                method = optim_method),silent = T)
+    if(class(opt)=='try-error'){
+      warning(paste(opt[1],'; returning the initialization values'))
+    }else{
+      m = opt$par[1:n]
+      v = exp(opt$par[(n+1):(2*n)])
+    }
+
+
+
 
     if(est_beta){
       beta = sum(qz/Sigma2k*matrix(m,nrow=n,ncol=K,byrow=F)/sum(qz/Sigma2k))

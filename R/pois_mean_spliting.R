@@ -68,7 +68,7 @@ pois_mean_split = function(x,s=NULL,
     #   mu_pm[i] = temp$m
     #   mu_pv[i] = temp$v
     # }
-    opt = vga_optimize(c(mu_pm,mu_pv),x,s,b_pm,sigma2)
+    opt = vga_optimize(c(mu_pm,log(mu_pv)),x,s,b_pm,sigma2)
     mu_pm = opt$m
     mu_pv = opt$v
 
