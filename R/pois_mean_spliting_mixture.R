@@ -83,30 +83,11 @@ pois_mean_split_mixture = function(x,s=NULL,
   obj[1] = -Inf
 
   for (iter in 1:maxiter) {
-
-    # # # VGA
-    # for(i in 1:n){
-    #   for (k in 1:K) {
-    #     temp = pois_mean_GG1(x[i],s[i],b_pm[i],sigma2k[k],optim_method,M[i,k],V[i,k])
-    #     M[i,k] = temp$m
-    #     V[i,k] = temp$v
-    #   }
-    # }
-
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = optim(c(M[,k],log(V[,k])),
-                  fn = pois_mean_GG_opt_obj,
-                  gr = pois_mean_GG_opt_obj_gradient,
-                  x=x,
-                  s=s,
-                  beta=b_pm,
-                  sigma2=sigma2k[k],
-                  n=n,
-                  #const=const,
-                  method = optim_method)
-      M[,k] = opt$par[1:n]
-      V[,k] = exp(opt$par[(n+1):(2*n)])
+      opt = vga_optimize(c(M[,k],V[,k]),x,s,b_pm,sigma2k[k])
+      M[,k] = opt$m
+      V[,k] = opt$v
     }
 
     qz = X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*b_pm+matrix(b_pm^2+b_pv,nrow=n,ncol=K,byrow=F))/Sigma2k/2 + log(V)/2

@@ -122,7 +122,6 @@ nb_mean_lower_bound = function(x,
   #             r_trace=r_trace))
 }
 
-#'@return objective function value
 neg_binom_mean_lb_obj = function(x,m,v,r,xi,H_mu){
   n = length(x)
   #xi = sqrt(m^2+v)

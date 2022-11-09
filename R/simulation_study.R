@@ -128,7 +128,7 @@ gen_data_log_link = function(n=1e3,n_simu=100,w=0.8,
 #'@export
 simu_study_poisson_mean = function(sim_data,
                                    ebnm_params = list(prior_family='normal_scale_mixture'),
-                                   tol=1e-5,maxiter=2e3,n_cores = 10,
+                                   tol=1e-8,maxiter=2e3,n_cores = 10,
                                    method_list = c('GG','GMG','GMGM',
                                                    'GMGM_pointmass',
                                                    'nb_lb','nb_pg',
@@ -173,7 +173,7 @@ simu_study_poisson_mean = function(sim_data,
 
 
     if('nb_lb'%in%method_list){
-      res_nb_lb = try(nb_mean_lower_bound(X[i,],r=2*max(X[i,]),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
+      res_nb_lb = try(nb_mean_lower_bound(X[i,],r=1000,tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
       fitted_model$nb_lb = res_nb_lb
     }
 

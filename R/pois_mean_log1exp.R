@@ -29,6 +29,7 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
   }
 
   pseudo_s = sqrt(1/kapa)
+  const = sum(lfactorial(x))
 
   mu_tilde = x
   obj = rep(0,maxiter+1)
@@ -62,7 +63,7 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
     mu_tilde = m
 
     # calc objective function
-    obj[iter+1] = -sum(nll(x,mu_tilde)+nll_d1(x,mu_tilde)*(m-mu_tilde)+kapa/2*(m^2+v+mu_tilde^2-2*m*mu_tilde))+H
+    obj[iter+1] = -sum(nll(x,mu_tilde)+nll_d1(x,mu_tilde)*(m-mu_tilde)+kapa/2*(m^2+v+mu_tilde^2-2*m*mu_tilde))+H - const
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
       break

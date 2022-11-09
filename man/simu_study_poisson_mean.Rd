@@ -7,7 +7,7 @@
 simu_study_poisson_mean(
   sim_data,
   ebnm_params = list(prior_family = "normal_scale_mixture"),
-  tol = 1e-05,
+  tol = 1e-08,
   maxiter = 2000,
   n_cores = 10,
   method_list = c("GG", "GMG", "GMGM", "GMGM_pointmass", "nb_lb", "nb_pg", "log1exp",

@@ -105,7 +105,7 @@ pois_mean_GMG = function(x,
     #   v[i] = temp$s2
     # }
 
-    opt = optim(c(m,log(v)),
+    opt = optim(c(m,v),
                 fn = pois_mean_GMG_opt_obj,
                 gr = pois_mean_GMG_opt_obj_gradient,
                 x=x,

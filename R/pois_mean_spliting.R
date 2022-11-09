@@ -68,19 +68,22 @@ pois_mean_split = function(x,s=NULL,
     #   mu_pm[i] = temp$m
     #   mu_pv[i] = temp$v
     # }
+    opt = vga_optimize(c(mu_pm,mu_pv),x,s,b_pm,sigma2)
+    mu_pm = opt$m
+    mu_pv = opt$v
 
-    opt = optim(c(mu_pm,log(mu_pv)),
-                fn = pois_mean_GG_opt_obj,
-                gr = pois_mean_GG_opt_obj_gradient,
-                x=x,
-                s=s,
-                beta=b_pm,
-                sigma2=sigma2,
-                n=n,
-                #const=const,
-                method = optim_method)
-    mu_pm = opt$par[1:n]
-    mu_pv = exp(opt$par[(n+1):(2*n)])
+    # opt = optim(c(mu_pm,log(mu_pv)),
+    #             fn = pois_mean_GG_opt_obj,
+    #             gr = pois_mean_GG_opt_obj_gradient,
+    #             x=x,
+    #             s=s,
+    #             beta=b_pm,
+    #             sigma2=sigma2,
+    #             n=n,
+    #             #const=const,
+    #             method = optim_method)
+    # mu_pm = opt$par[1:n]
+    # mu_pv = exp(opt$par[(n+1):(2*n)])
 
     # EBNM
     res = ebnm(mu_pm,sqrt(sigma2),

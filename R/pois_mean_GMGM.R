@@ -113,18 +113,9 @@ pois_mean_GMGM = function(x,
 
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = optim(c(M[,k],log(V[,k])),
-                  fn = pois_mean_GG_opt_obj,
-                  gr = pois_mean_GG_opt_obj_gradient,
-                  x=x,
-                  s=s,
-                  beta=beta,
-                  sigma2=sigma2k[k],
-                  n=n,
-                  #const=const,
-                  method = optim_method)
-      M[,k] = opt$par[1:n]
-      V[,k] = exp(opt$par[(n+1):(2*n)])
+      opt = vga_optimize(c(M[,k],V[,k]),x,s,beta,sigma2k[k])
+      M[,k] = opt$m
+      V[,k] = opt$v
     }
     # update posterior weights
     qz = X*M-s*exp(M+V/2)+matrix(log(w),nrow=n,ncol=K,byrow=T)-log(Sigma2k)/2-(M^2+V-2*M*beta+beta^2)/Sigma2k/2 + log(V)/2
