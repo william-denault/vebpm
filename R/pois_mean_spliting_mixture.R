@@ -135,7 +135,8 @@ pois_mean_split_mixture = function(x,s=NULL,
                                #posteriorVar_latent_b = b_pv,
                                mean = rowSums(qz*exp(M + V/2))),
               fitted_g = list(g_mu = list(weight=w,var=sigma2k),g_b = res$fitted_g),
-              obj_value=obj,
+              elbo=obj[length(obj)],
+              obj_trace = obj,
               fit = list(ebnm_fit=res,M=M,V=V,qz=qz)))
 
   #return(list(posteriorMean_mu=rowSums(qz*M),posterior2nd_moment= rowSums(qz*(M^2+V)),M=M,V=V,obj_value=obj,w=w,qz=qz,posteriorMean_b=b_pm,ebnm_res = res))

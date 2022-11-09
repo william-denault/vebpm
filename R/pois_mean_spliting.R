@@ -118,7 +118,8 @@ pois_mean_split = function(x,s=NULL,
                                #posteriorVar_latent_b = b_pv,
                                mean = exp(mu_pm + mu_pv/2)),
               fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),
-              obj_value=obj,
+              elbo=obj[length(obj)],
+              obj_trace = obj,
               fit = res))
 
   # return(list(posteriorMean = mu_pm,

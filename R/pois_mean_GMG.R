@@ -142,7 +142,8 @@ pois_mean_GMG = function(x,
                                var_log = v,
                                mean = exp(m+v/2)),
               fitted_g = list(weight = w,mean=beta,var=sigma2k),
-              obj_value=obj,
+              elbo=obj[length(obj)],
+              obj_trace = obj,
               qz=qz))
   #return(list(posteriorMean=m,posteriorVar=v,obj_value=obj,w=w,qz=qz,priorMean=beta))
 

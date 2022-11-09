@@ -79,6 +79,7 @@ pois_mean_penalized_compound = function(x,
                                var_log = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
                                mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
+              elbo=-out$objective,
               fit =list(z=z_hat,s=s_hat,nloptr_fit = out)))
 
   # return(list(posteriorMean = m,

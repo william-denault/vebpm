@@ -111,7 +111,8 @@ nb_mean_lower_bound = function(x,
                                mean = r*S_exp(pseudo_x,pseudo_s,res$fitted_g$pi,res$fitted_g$mean[1],res$fitted_g[[3]]),
                                mean_log = log(r)+m),
               fitted_g = res$fitted_g,
-              obj_value=obj,
+              elbo=obj[length(obj)],
+              obj_trace = obj,
               fit = res))
 
   # return(list(posteriorMean=m,

@@ -62,8 +62,10 @@ pois_mean_penalized_inversion = function(x,
     w = rep(1/K,K)
   }
 
+  const = lfactorial(x)
+
   fit = optim(c(log(x+1),w,beta),f_obj,f_obj_grad,
-              method = optim_method,y=x,grid=mixsd,
+              method = optim_method,y=x,grid=mixsd,const=const,
               control=list(trace=verbose,maxit=maxiter,factr=tol/.Machine$double.eps))
 
   m = fit$par[1:n]
@@ -75,6 +77,7 @@ pois_mean_penalized_inversion = function(x,
                                var_log = PV(z_hat,s_hat,w_hat,mu_hat,mixsd),
                                mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
+              elbo=-fit$value,
               fit =list(z=z_hat,s=s_hat,optim_fit = fit)))
 
   #return(list(posteriorMean = fit$par[1:n], w = softmax(fit$par[(n+1):(n+K)]), priorMean = fit$par[n+K+1], optim_fit = fit,sigma2k=sigma2k))
@@ -84,7 +87,7 @@ pois_mean_penalized_inversion = function(x,
 
 #'@title objective function for inversion method
 #'@param params (theta,w,mu)
-f_obj = function(params,y,grid){
+f_obj = function(params,y,grid,const){
   n = length(y)
   K = length(grid)
   theta = params[1:n]
@@ -93,7 +96,7 @@ f_obj = function(params,y,grid){
   mu = params[n+K+1]
   s = sqrt(exp(-theta))
   z = S_inv(theta,s,w,mu,grid)
-  val = sum(-y*theta+exp(theta)+lfactorial(y)-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(2*pi*s^2)/2)
+  val = sum(-y*theta+exp(theta)+const-l_nm(z,s,w,mu,grid)-(theta-z)^2/2/s^2-log(2*pi*s^2)/2)
   #print(theta)
   #print(l_nm(z,s,w,mu,grid))
   #z = S_inv(theta,s,w,mu,grid,z_range)
@@ -101,7 +104,7 @@ f_obj = function(params,y,grid){
   return(val)
 }
 
-f_obj_grad=function(params,y,grid){
+f_obj_grad=function(params,y,grid,const){
   n = length(y)
   K = length(grid)
   theta = params[1:n]

@@ -165,7 +165,8 @@ pois_mean_GMGM = function(x,
                                #2nd_moment_log = rowSums(qz*(M^2+V)) + qz0*beta^2,
                                mean = rowSums(qz*exp(M + V/2))+ qz0*exp(beta)),
               fitted_g = list(weight = c(w0,w),mean=beta,var=c(0,sigma2k)),
-              obj_value=obj,
+              elbo=obj[length(obj)],
+              obj_trace = obj,
               fit = list(M=M,V=V,qz=qz,qz0=qz0)))
 
   # if(point_mass){

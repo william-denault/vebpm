@@ -4,7 +4,7 @@
 \alias{f_obj}
 \title{objective function for inversion method}
 \usage{
-f_obj(params, y, grid)
+f_obj(params, y, grid, const)
 }
 \arguments{
 \item{params}{(theta,w,mu)}

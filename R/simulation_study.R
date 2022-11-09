@@ -178,7 +178,7 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('nb_pg'%in%method_list){
-      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=2*max(X[i,]),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
+      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=100,tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
       fitted_model$nb_pg = res_nb_pg
     }
 
@@ -198,12 +198,12 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('penalty_compound'%in%method_list){
-      res_compound = try(pois_mean_penalized_compound(X[i,]))
+      res_compound = try(pois_mean_penalized_compound(X[i,],tol=tol))
       fitted_model$penalty_compound = res_compound
     }
 
     if('penalty_inversion'%in%method_list){
-      res_inversion = try(pois_mean_penalized_inversion(X[i,]))
+      res_inversion = try(pois_mean_penalized_inversion(X[i,],tol=tol))
       fitted_model$penalty_inversion = res_inversion
     }
 
