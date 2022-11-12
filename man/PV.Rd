@@ -2,10 +2,10 @@
 % Please edit documentation in R/normal_mean_model_utils.R
 \name{PV}
 \alias{PV}
-\title{posterior var operator}
+\title{posterior variance operator}
 \usage{
 PV(x, s, w, mu, grid)
 }
 \description{
-posterior var operator
+posterior variance operator
 }

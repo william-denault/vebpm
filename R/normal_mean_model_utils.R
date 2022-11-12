@@ -268,17 +268,17 @@ softmax = function(a){
 }
 
 #' #'posterior mean operator
-#' S = function(x,s,w,mu,grid){
+#' S_true = function(x,s,w,mu,grid){
 #'   K = length(w)
-#'   g = normalmix(pi=w,mean=rep(mu,K),sd=grid)
+#'   g = ashr::normalmix(pi=w,mean=rep(mu,K),sd=grid)
 #'   fit.ash = ashr::ash(x,s,g=g,fixg=T)
 #'   fit.ash$result$PosteriorMean
 #' }
-#'
+
 #'posterior mean operator
 S = function(x,s,w,mu,grid){
   lW = matrix(log(w),nrow=length(x),ncol=length(grid),byrow=T)
-  pw = lW+dnorm(x,mean=mu,sd=outer(s^2,grid^2,FUN='+'),log=TRUE)
+  pw = lW+dnorm(x,mean=mu,sd=sqrt(outer(s^2,grid^2,FUN='+')),log=TRUE)
   pw = pw - apply(pw,1,max)
   pw = exp(pw)/rowSums(exp(pw))
   temp  = outer(s^2,grid^2,FUN='/')
@@ -311,10 +311,33 @@ S_exp = function(x,s,w,mu,grid){
   return(rowSums(pw*exp(pm+pv/2)))
 }
 
-#'posterior var operator
+#'posterior variance operator
 PV = function(x,s,w,mu,grid){
-  return(1+s^2*l_nm_d2_z(x,s,w,mu,grid))
+  lW = matrix(log(w),nrow=length(x),ncol=length(grid),byrow=T)
+  pw = lW+dnorm(x,mean=mu,sd=sqrt(outer(s^2,grid^2,FUN='+')),log=TRUE)
+  pw = pw - apply(pw,1,max)
+  pw = exp(pw)/rowSums(exp(pw))
+  temp  = outer(s^2,grid^2,FUN='/')
+  pm = x/(1+temp) + mu/(1+1/temp)
+  temp_v = outer(1/s^2,1/grid^2,FUN='+')
+  pv = 1/temp_v
+  Em = rowSums(pw*pm)
+  Em2 = rowSums(pw*(pm^2+pv))
+  return(Em2-Em^2)
 }
+
+#' #'posterior variance operator
+#' PV_true = function(x,s,w,mu,grid){
+#'     K = length(w)
+#'     g = ashr::normalmix(pi=w,mean=rep(mu,K),sd=grid)
+#'     fit.ash = ashr::ash(x,s,g=g,fixg=T)
+#'     fit.ash$result$PosteriorSD^2
+#' }
+
+#' #'posterior variance operator
+#' PV = function(x,s,w,mu,grid){
+#'   return(1+s^2*l_nm_d2_z(x,s,w,mu,grid))
+#' }
 
 #'@title objective function for solving S(z)=theta
 S_inv_obj = function(z,theta,s,w,mu,grid){
@@ -337,10 +360,10 @@ S_inv_obj = function(z,theta,s,w,mu,grid){
 # S_inv_obj_jac(x,theta,s,w,mu0,sigma2k)
 # S_inv2(theta,s,w,mu0,sigma2k)
 
-#'@title jacobian of  objective function for solving S(z)=theta
-S_inv_obj_jac = function(z,theta,s,w,mu,grid){
-  return(diag(c(1+s^2*l_nm_d2_z(z,s,w,mu,grid))))
-}
+#' #' jacobian of  objective function for solving S(z)=theta
+#' S_inv_obj_jac = function(z,theta,s,w,mu,grid){
+#'   return(diag(c(1+s^2*l_nm_d2_z(z,s,w,mu,grid))))
+#' }
 
 # $root
 # [1]      NaN 1.479702      NaN 1.481018 0.326163      NaN 0.326163      NaN      NaN 1.479702
@@ -358,16 +381,20 @@ S_inv_obj_jac = function(z,theta,s,w,mu,grid){
 #'@title bisection for root finding. Vectorized
 #'@description modified from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
 bisection= function(f, lower, upper, ...,
-                    maxiter =100,
+                    maxiter =1000,
                     tol = 1e-8,
                     search_step = 1) {
 
   # make sure all f(lower)<0 and all f(upper)>0
+  if(length(search_step)==1){
+    search_step = rep(search_step,length(lower))
+  }
   l = which(f(lower,...) > 0)
   u = which(f(upper,...) < 0)
+  counter = 0
   while((sum(l)+sum(u))!=0){
     if(sum(l)!=0){
-      lower[l] = lower[l] - search_step
+      lower[l] = lower[l] - search_step[l]
       fl = f(lower,...)
       if(any(is.nan(fl))){
         stop('NaN in f(lower)')
@@ -376,13 +403,17 @@ bisection= function(f, lower, upper, ...,
       #print(l)
     }
     if(sum(u)!=0){
-      upper[u] = upper[u] + search_step
+      upper[u] = upper[u] + search_step[u]
       fu = f(upper,...)
       if(any(is.nan(fu))){
         stop('NaN in f(upper)')
       }
       u = which(fu < 0)
       #print(u)
+    }
+    counter = counter + 1
+    if(counter>maxiter){
+      stop('Cannot find searching interval, consider increasing maxiter')
     }
   }
 
@@ -419,55 +450,55 @@ S_inv = function(theta,s,w,mu,grid){
     upper = ifelse(theta<=mu,theta,theta+s^2*10)
     #print(lower)
     #print(upper)
-    sol = try(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta))
-    #print(sol)
-    if(class(sol)=='try-error'){
-        sol = multiroot(S_inv_obj,start = theta,
-                            #jacfunc=S_inv_obj_jac,
-                            jactype = 'bandint',
-                            bandup=0,banddown=0,maxiter =100,
-                            theta=theta,s=s,w=w,mu=mu,grid=grid)
-        #print(sol)
-        if(is.nan(sol$estim.precis)|sol$iter==1){
-          sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
-                        theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
-          return(sol$x)
-        }else{
-          return(sol$root)
-        }
-    }else{
-      return(sol)
-    }
+    sol = try(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta,search_step = s^2))
+    return(sol)
+    # if(class(sol)=='try-error'){
+    #     sol = try(multiroot(S_inv_obj,start = theta,
+    #                         #jacfunc=S_inv_obj_jac,
+    #                         jactype = 'bandint',
+    #                         bandup=0,banddown=0,maxiter =100,
+    #                         theta=theta,s=s,w=w,mu=mu,grid=grid))
+    #     #print(sol)
+    #     if(class(sol)[1]=='try-error'|is.nan(sol$estim.precis)|sol$iter==1){
+    #       sol = nleqslv(x=theta,fn=S_inv_obj,jac=NULL,
+    #                     theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
+    #       return(sol$x)
+    #     }else{
+    #       return(sol$root)
+    #     }
+    # }else{
+    #   return(sol)
+    # }
   }
 }
 
 
-#' I tried supply the Jacobin matrix but there's always an error says singular matrix.
-#' But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
-#' S_inv = function(theta,s,w,mu,grid){
-#'   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
-#'     return(rep(mu,length(theta)))
-#'   }else{
-#'     sol = multiroot(S_inv_obj,start = theta,
-#'                         #jacfunc=S_inv_obj_jac,
-#'                         jactype = 'bandint',
-#'                         bandup=0,banddown=0,maxiter =100,
-#'                         theta=theta,s=s,w=w,mu=mu,grid=grid)
-#'     #print(sol)
-#'     if(is.nan(sol$estim.precis)|sol$iter==1){
-#'       sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
-#'                     theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
-#'       if(sol$iter==1){
-#'         return(S_inv_loop(theta,s,w,mu,grid))
-#'       }else{
-#'         return(sol$x)
-#'       }
-#'
-#'     }else{
-#'       return(sol$root)
-#'     }
-#'   }
-#' }
+# I tried supply the Jacobin matrix but there's always an error says singular matrix.
+# But it works sometimes with numerically calculated Jacobian. Eventhough I checked thy are the same
+# S_inv = function(theta,s,w,mu,grid){
+#   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
+#     return(rep(mu,length(theta)))
+#   }else{
+#     sol = multiroot(S_inv_obj,start = theta,
+#                         #jacfunc=S_inv_obj_jac,
+#                         jactype = 'bandint',
+#                         bandup=0,banddown=0,maxiter =100,
+#                         theta=theta,s=s,w=w,mu=mu,grid=grid)
+#     #print(sol)
+#     if(is.nan(sol$estim.precis)|sol$iter==1){
+#       sol = nleqslv(x=theta,fn=S_inv_obj,jac=S_inv_obj_jac,
+#                     theta=theta,s=s,w=w,mu=mu,grid=grid,control = list(allowSingular=TRUE))
+#       if(sol$iter==1){
+#         return(S_inv_loop(theta,s,w,mu,grid))
+#       }else{
+#         return(sol$x)
+#       }
+#
+#     }else{
+#       return(sol$root)
+#     }
+#   }
+# }
 
 
 # S_inv3 = function(theta,s,w,mu,grid){
@@ -478,71 +509,71 @@ S_inv = function(theta,s,w,mu,grid){
 #   return(opt)
 # }
 
-#' #########################S_inv using uniroot in a for loop. Slow###############'@title inverse operator of S
-#' #'  S^{-1}(theta) returns the z such that S(z) = theta
-#' S_inv_loop = function(theta,s,w,mu,grid,z_range=NULL){
-#'
-#'   # obj = function(z,theta,s,w,mu,grid){
-#'   #   return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
-#'   # }
-#'
-#'   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
-#'     return(rep(mu,length(theta)))
-#'   }else{
-#'     if(is.null(z_range)){
-#'       z_range = c(-10,10)
-#'     }
-#'     n = length(theta)
-#'     z_out = double(n)
-#'     for(j in 1:n){
-#'       #print(j)
-#'       if(theta[j]>=0){
-#'         # z_out[j] = uniroot(obj,c(theta[j],theta[j]/median(1/(1+s[j]^2/grid^2))),
-#'         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
-#'         z_out[j] = uniroot(S_inv_obj,c(theta[j],z_range[2]),
-#'                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
-#'       }else{
-#'         # z_out[j] = uniroot(obj,c(theta[j]/median(1/(1+s[j]^2/grid^2)),theta[j]),
-#'         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
-#'         z_out[j] = uniroot(S_inv_obj,c(z_range[1],theta[j]),
-#'                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
-#'       }
-#'
-#'     }
-#'     return(z_out)
-#'   }
+# #########################S_inv using uniroot in a for loop. Slow###############
+# #  S^{-1}(theta) returns the z such that S(z) = theta
+# S_inv_loop = function(theta,s,w,mu,grid,z_range=NULL){
+#
+#   # obj = function(z,theta,s,w,mu,grid){
+#   #   return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
+#   # }
+#
+#   if(grid[1]==0&isTRUE(all.equal(w[1],1))){
+#     return(rep(mu,length(theta)))
+#   }else{
+#     if(is.null(z_range)){
+#       z_range = c(-10,10)
+#     }
+#     n = length(theta)
+#     z_out = double(n)
+#     for(j in 1:n){
+#       #print(j)
+#       if(theta[j]>=0){
+#         # z_out[j] = uniroot(obj,c(theta[j],theta[j]/median(1/(1+s[j]^2/grid^2))),
+#         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
+#         z_out[j] = uniroot(S_inv_obj,c(theta[j],z_range[2]),
+#                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
+#       }else{
+#         # z_out[j] = uniroot(obj,c(theta[j]/median(1/(1+s[j]^2/grid^2)),theta[j]),
+#         #                    theta=theta[j],s=s[j],w=w,grid=grid,extendInt = 'upX')$root
+#         z_out[j] = uniroot(S_inv_obj,c(z_range[1],theta[j]),
+#                            theta=theta[j],s=s[j],w=w,grid=grid,mu=mu,extendInt = 'upX')$root
+#       }
+#
+#     }
+#     return(z_out)
+#   }
 
 
-#'}
-#'
-#' #' inverse operator of S, parallel version using mclapply
-#' #'  S^{-1}(theta) returns the z such that S(z) = theta
-#'
-#' library(parallel)
-#' S_inv_parallel = function(theta,s,w,mu,grid,z_range=NULL){
-#'
-#'   obj = function(z,theta,s,w,mu,grid){
-#'     return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
-#'   }
-#'
-#'   f = function(i,theta,s,w,mu,grid,z_range){
-#'     if(theta[i]>=0){
-#'       return(uniroot(obj,c(theta[i],z_range[2]),
-#'                          theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
-#'     }else{
-#'      return(uniroot(obj,c(z_range[1],theta[i]),
-#'                          theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
-#'     }
-#'   }
-#'
-#'   if(is.null(z_range)){
-#'     z_range = range(theta) + c(-5,5)
-#'   }
-#'
-#'   n = length(theta)
-#'   z_out = simplify2array(mclapply(1:n,f,theta=theta,s=s,w=w,mu=mu,grid=grid,z_range=z_range,mc.cores = 10))
-#'   z_out
-#' }
+# }
+#
+# ## inverse operator of S, parallel version using mclapply
+# ##  S^{-1}(theta) returns the z such that S(z) = theta
+#
+# library(parallel)
+# S_inv_parallel = function(theta,s,w,mu,grid,z_range=NULL){
+#
+#   obj = function(z,theta,s,w,mu,grid){
+#     return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
+#   }
+#
+#   f = function(i,theta,s,w,mu,grid,z_range){
+#     if(theta[i]>=0){
+#       return(uniroot(obj,c(theta[i],z_range[2]),
+#                          theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
+#     }else{
+#      return(uniroot(obj,c(z_range[1],theta[i]),
+#                          theta=theta[i],s=s[i],w=w,grid=grid,mu=mu,extendInt = 'upX')$root)
+#     }
+#   }
+#
+#   if(is.null(z_range)){
+#     z_range = range(theta) + c(-5,5)
+#   }
+#
+#   n = length(theta)
+#   z_out = simplify2array(mclapply(1:n,f,theta=theta,s=s,w=w,mu=mu,grid=grid,z_range=z_range,mc.cores = 10))
+#   z_out
+# }
 
 #'@title compound penalty function of ebnm
 nm_penalty_compound = function(theta,s,w,mu,grid){

@@ -110,7 +110,7 @@ nb_mean_polya_gamma = function(x,
               fitted_g = res$fitted_g,
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = res,
+              fit = list(ebnm_res = res,r=r),
               run_time = difftime(t_end,t_start,units='secs')))
   #
   # return(list(posteriorMean=m,

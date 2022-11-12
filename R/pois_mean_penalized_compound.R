@@ -58,7 +58,7 @@ pois_mean_penalized_compound = function(x,
 
   t_start = Sys.time()
   z_init = log(1+x)
-  local_opts = list( "algorithm" = "NLOPT_LD_LBFGS","xtol_rel" = tol)
+  local_opts = list( "algorithm" = "NLOPT_LD_LBFGS","xtol_rel" = tol,"maxeval" = maxiter)
   out = nloptr(c(z_init,-z_init,w,beta),
                eval_f=h_obj,
                eval_grad_f=h_obj_grad,

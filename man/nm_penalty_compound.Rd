@@ -7,8 +7,5 @@
 nm_penalty_compound(theta, s, w, mu, grid)
 }
 \description{
-
-}
-\details{
-
+compound penalty function of ebnm
 }

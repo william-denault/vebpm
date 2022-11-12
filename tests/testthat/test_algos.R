@@ -6,7 +6,7 @@ maxiter = 100
 ebnm_params=list(prior_family='normal_scale_mixture')
 
 res_GG = (pois_mean_GG(x,tol=tol,maxiter = maxiter))
-res_GMG = (pois_mean_GMG(x,tol=tol,maxiter = maxiter))
+#res_GMG = (pois_mean_GMG(x,tol=tol,maxiter = maxiter))
 res_GMGM = (pois_mean_GMGM(x,tol=tol,maxiter = maxiter))
 
 res_nb_lb = (nb_mean_lower_bound(x,tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))

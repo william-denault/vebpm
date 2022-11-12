@@ -4,8 +4,14 @@
 \alias{bisection}
 \title{bisection for root finding. Vectorized}
 \usage{
-bisection(f, lower, upper, ..., maxiter = 100, tol = 1e-08, search_step = 1)
+bisection(f, lower, upper, ..., maxiter = 1000, tol = 1e-08, search_step = 1)
 }
 \description{
 modified from https://stat.ethz.ch/pipermail/r-help/2012-November/340295.html
+}
+\details{
+#' jacobian of  objective function for solving S(z)=theta
+S_inv_obj_jac = function(z,theta,s,w,mu,grid){
+  return(diag(c(1+s^2*l_nm_d2_z(z,s,w,mu,grid))))
+}
 }
