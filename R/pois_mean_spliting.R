@@ -60,6 +60,7 @@ pois_mean_split = function(x,s=NULL,
   if(is.null(sigma2)){
     sigma2 = var(log(x+1))
   }
+  t_start = Sys.time()
   for (iter in 1:maxiter) {
 
     # # VGA
@@ -112,6 +113,7 @@ pois_mean_split = function(x,s=NULL,
     }
 
   }
+  t_end = Sys.time()
   return(list(posterior = list(mean_log = mu_pm,
                                mean_b = b_pm,
                                #osteriorVar_log_mean = mu_pv,
@@ -120,7 +122,8 @@ pois_mean_split = function(x,s=NULL,
               fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = res))
+              fit = res,
+              run_time = difftime(t_end,t_start,units='secs')))
 
   # return(list(posteriorMean = mu_pm,
   #             posteriorVar = mu_pv,

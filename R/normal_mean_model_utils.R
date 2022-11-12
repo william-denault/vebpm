@@ -275,21 +275,21 @@ softmax = function(a){
 #'   fit.ash$result$PosteriorMean
 #' }
 #'
-#' #'posterior mean operator
-#' S2 = function(x,s,w,mu,grid){
-#'   lW = matrix(log(w),nrow=length(x),ncol=length(grid),byrow=T)
-#'   pw = lW+dnorm(x,mean=mu,sd=outer(s^2,grid^2,FUN='+'),log=TRUE)
-#'   pw = pw - apply(pw,1,max)
-#'   pw = exp(pw)/rowSums(exp(pw))
-#'   temp  = outer(s^2,grid^2,FUN='/')
-#'   pm = x/(1+temp) + mu/(1+1/temp)
-#'   return(rowSums(pw*pm))
-#' }
-
 #'posterior mean operator
 S = function(x,s,w,mu,grid){
-  return(x+s^2*l_nm_d1_z(x,s,w,mu,grid))
+  lW = matrix(log(w),nrow=length(x),ncol=length(grid),byrow=T)
+  pw = lW+dnorm(x,mean=mu,sd=outer(s^2,grid^2,FUN='+'),log=TRUE)
+  pw = pw - apply(pw,1,max)
+  pw = exp(pw)/rowSums(exp(pw))
+  temp  = outer(s^2,grid^2,FUN='/')
+  pm = x/(1+temp) + mu/(1+1/temp)
+  return(rowSums(pw*pm))
 }
+
+#' #'posterior mean operator
+#' S = function(x,s,w,mu,grid){
+#'   return(x+s^2*l_nm_d1_z(x,s,w,mu,grid))
+#' }
 
 #'posterior mean of exp(mu) operator
 S_exp = function(x,s,w,mu,grid){
@@ -318,7 +318,8 @@ PV = function(x,s,w,mu,grid){
 
 #'@title objective function for solving S(z)=theta
 S_inv_obj = function(z,theta,s,w,mu,grid){
-  return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
+  return(S(z,s,w,mu,grid)-theta)
+  #return(z+s^2*l_nm_d1_z(z,s,w,mu,grid)-theta)
 }
 
 # S_inv_obj = function(t=0,y,theta,s,w,mu,grid,parms=NULL){

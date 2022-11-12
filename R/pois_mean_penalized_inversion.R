@@ -45,7 +45,8 @@ pois_mean_penalized_inversion = function(x,
     ## how to choose grid in this case?
     #mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
     s = 1
-    mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
+    #mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
+    mixsd = select_mixsd(x,1)
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #mixsd = c(0,1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
   }
@@ -64,9 +65,11 @@ pois_mean_penalized_inversion = function(x,
 
   const = lfactorial(x)
 
+  t_start = Sys.time()
   fit = optim(c(log(x+1),w,beta),f_obj,f_obj_grad,
               method = optim_method,y=x,grid=mixsd,const=const,
               control=list(trace=verbose,maxit=maxiter,factr=tol/.Machine$double.eps))
+  t_end = Sys.time()
 
   m = fit$par[1:n]
   w_hat = softmax(fit$par[(n+1):(n+K)])
@@ -78,7 +81,8 @@ pois_mean_penalized_inversion = function(x,
                                mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               elbo=-fit$value,
-              fit =list(z=z_hat,s=s_hat,optim_fit = fit)))
+              fit =list(z=z_hat,s=s_hat,optim_fit = fit),
+              run_time = difftime(t_end,t_start,units='secs')))
 
   #return(list(posteriorMean = fit$par[1:n], w = softmax(fit$par[(n+1):(n+K)]), priorMean = fit$par[n+K+1], optim_fit = fit,sigma2k=sigma2k))
 

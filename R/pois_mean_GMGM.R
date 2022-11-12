@@ -99,6 +99,7 @@ pois_mean_GMGM = function(x,
   obj = rep(0,maxiter+1)
   obj[1] = -Inf
 
+  t_start = Sys.time()
   for(iter in 1:maxiter){
     # for each K, solve a vectorized version
     for(k in 1:K){
@@ -150,13 +151,15 @@ pois_mean_GMGM = function(x,
 
   }
 
+  t_end = Sys.time()
   return(list(posterior = list(mean_log = rowSums(qz*M) + qz0*beta,
                                #2nd_moment_log = rowSums(qz*(M^2+V)) + qz0*beta^2,
                                mean = rowSums(qz*exp(M + V/2))+ qz0*exp(beta)),
               fitted_g = list(weight = c(w0,w),mean=beta,var=c(0,sigma2k)),
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = list(M=M,V=V,qz=qz,qz0=qz0)))
+              fit = list(M=M,V=V,qz=qz,qz0=qz0),
+              run_time = difftime(t_end,t_start,units='secs')))
 
   # if(point_mass){
   #   return(list(posteriorMean=rowSums(qz*M) + qz0*beta,posterior2nd_moment= rowSums(qz*(M^2+V)) + qz0*beta^2,priorMean=beta,w=w,w0=w0,M=M,V=V,obj_value=obj,qz=qz,qz0=qz0))

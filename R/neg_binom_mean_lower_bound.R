@@ -61,6 +61,7 @@ nb_mean_lower_bound = function(x,
     est_r = TRUE
   }
   r_trace = r
+  t_start = Sys.time()
   for(iter in 1:maxiter){
 
     # update xi
@@ -103,6 +104,7 @@ nb_mean_lower_bound = function(x,
   }
   p = 1/(1+exp(-m))
 
+  t_end = Sys.time()
 
 
 
@@ -113,7 +115,8 @@ nb_mean_lower_bound = function(x,
               fitted_g = res$fitted_g,
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = res))
+              fit = res,
+              run_time = difftime(t_end,t_start,units='secs')))
 
   # return(list(posteriorMean=m,
   #             posteriorVar=v,

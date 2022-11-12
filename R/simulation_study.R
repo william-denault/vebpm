@@ -129,14 +129,13 @@ gen_data_log_link = function(n=1e3,n_simu=100,w=0.8,
 simu_study_poisson_mean = function(sim_data,
                                    ebnm_params = list(prior_family='normal_scale_mixture'),
                                    tol=1e-8,maxiter=2e3,n_cores = 10,
-                                   method_list = c('GG','GMG','GMGM',
+                                   method_list = c('GG','GMGM',
                                                    'GMGM_pointmass',
                                                    'nb_lb','nb_pg',
                                                    'log1exp','split','split_mixture',
                                                    'penalty_compound',
                                                    'penalty_inversion',
                                                    'ash_pois_identity',
-                                                   'ash_pois_log',
                                                    'ebpm_gamma',
                                                    'ebpm_exp_mixture'),
                                    save_data = TRUE){
@@ -178,7 +177,7 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('nb_pg'%in%method_list){
-      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=100,tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
+      res_nb_pg = try(nb_mean_polya_gamma(X[i,],r=max(100,median(X[i,])),tol=tol,maxiter = maxiter,ebnm_params = ebnm_params))
       fitted_model$nb_pg = res_nb_pg
     }
 
@@ -208,8 +207,11 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('ash_pois_identity'%in%method_list){
+      t_start = Sys.time()
       res_ash_pois_identity = try(ash_pois(X[i,],link='identity'))
+      t_end=Sys.time()
       res_ash_pois_identity$posterior = list(mean=res_ash_pois_identity$result$PosteriorMean,mean_log=log(res_ash_pois_identity$result$PosteriorMean))
+      res_ash_pois_identity$run_time = difftime(t_end,t_start,units='secs')
       fitted_model$ash_pois_identity = res_ash_pois_identity
     }
 
@@ -220,12 +222,18 @@ simu_study_poisson_mean = function(sim_data,
     }
 
     if('ebpm_gamma'%in%method_list){
+      t_start = Sys.time()
       res_ebpm_gamma = try(ebpm_gamma(X[i,]))
+      t_end=Sys.time()
+      res_ebpm_gamma$run_time = difftime(t_end,t_start,units='secs')
       fitted_model$ebpm_gamma = res_ebpm_gamma
     }
 
     if('ebpm_exp_mixture'%in%method_list){
+      t_start = Sys.time()
       res_ebpm_exp_mixture = try(ebpm_exponential_mixture(X[i,]))
+      t_end=Sys.time()
+      res_ebpm_exp_mixture$run_time = difftime(t_end,t_start,units='secs')
       fitted_model$ebpm_exp_mixture = res_ebpm_exp_mixture
     }
 
@@ -262,12 +270,30 @@ simu_study_poisson_mean = function(sim_data,
       }
     }))
 
+    run_times = simplify2array(lapply(fitted_model,function(x){
+      if(class(x)!='try-error'){
+        x$run_time
+      }else{
+        NA
+      }
+    }))
+
+    elbos = simplify2array(lapply(fitted_model,function(x){
+      if(class(x)!='try-error'){
+        x$elbo
+      }else{
+        NA
+      }
+    }))
+
 
     return(list(fitted_model = fitted_model,
                 MSE_mean=MSE_mean,
                 MAE_mean=MAE_mean,
                 MSE_log_mean=MSE_log_mean,
-                MAE_log_mean=MAE_log_mean))
+                MAE_log_mean=MAE_log_mean,
+                run_times=run_times,
+                elbos=elbos))
 
   },mc.cores = n_cores)
   if(save_data){

@@ -83,6 +83,8 @@ pois_mean_split_mixture = function(x,s=NULL,
   obj = rep(0,maxiter+1)
   obj[1] = -Inf
 
+  t_start = Sys.time()
+
   for (iter in 1:maxiter) {
     # for each K, solve a vectorized version
     for(k in 1:K){
@@ -130,6 +132,8 @@ pois_mean_split_mixture = function(x,s=NULL,
 
   }
 
+  t_end = Sys.time()
+
   return(list(posterior = list(mean_log = rowSums(qz*M),
                                mean_b = b_pm,
                                #posterior2nd_moment_log_mean = rowSums(qz*(M^2+V)),
@@ -138,7 +142,8 @@ pois_mean_split_mixture = function(x,s=NULL,
               fitted_g = list(g_mu = list(weight=w,var=sigma2k),g_b = res$fitted_g),
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = list(ebnm_fit=res,M=M,V=V,qz=qz)))
+              fit = list(ebnm_fit=res,M=M,V=V,qz=qz),
+              run_time = difftime(t_end,t_start,units='secs')))
 
   #return(list(posteriorMean_mu=rowSums(qz*M),posterior2nd_moment= rowSums(qz*(M^2+V)),M=M,V=V,obj_value=obj,w=w,qz=qz,posteriorMean_b=b_pm,ebnm_res = res))
 

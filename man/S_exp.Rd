@@ -2,10 +2,18 @@
 % Please edit documentation in R/normal_mean_model_utils.R
 \name{S_exp}
 \alias{S_exp}
-\title{posterior mean of exp(mu) operator}
+\title{#'posterior mean operator
+S = function(x,s,w,mu,grid){
+  return(x+s^2*l_nm_d1_z(x,s,w,mu,grid))
+}
+posterior mean of exp(mu) operator}
 \usage{
 S_exp(x, s, w, mu, grid)
 }
 \description{
+#'posterior mean operator
+S = function(x,s,w,mu,grid){
+  return(x+s^2*l_nm_d1_z(x,s,w,mu,grid))
+}
 posterior mean of exp(mu) operator
 }

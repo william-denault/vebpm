@@ -43,6 +43,7 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
     }
     ebnm_params = temp
   }
+  t_start = Sys.time()
   for(iter in 1:maxiter){
     # update g,q by performing ebnm
     pseudo_x = mu_tilde-nll_d1(x,mu_tilde)/kapa
@@ -73,6 +74,7 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
     }
 
   }
+  t_end = Sys.time()
   return(list(posterior = list(mean_latent = m,
                                var_latent = v,
                                mean = log1pexp(m),
@@ -80,7 +82,8 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
               fitted_g = res$fitted_g,
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = res))
+              fit = res,
+              run_time = difftime(t_end,t_start,units='secs')))
 
   #return(list(posteriorMean=m,posteriorVar=v,obj_value=obj,ebnm_res=res,kappa=kapa))
 }

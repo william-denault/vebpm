@@ -54,6 +54,7 @@ pois_mean_GG = function(x,
     s = rep(s,n)
   }
   #
+  t_start = Sys.time()
   if(is.null(prior_mean) | is.null(prior_var)){
 
     if(is.null(prior_mean)){
@@ -102,13 +103,15 @@ pois_mean_GG = function(x,
     obj = pois_mean_GG_obj(x,s,prior_mean,prior_var,m,v,const)
 
   }
+  t_end = Sys.time()
 
   return(list(posterior = list(mean_log = m,
                                var_log = v,
                                mean = exp(m + v/2)),
               fitted_g = list(mean = beta, var=sigma2),
               elbo=obj[length(obj)],
-              obj_trace = obj))
+              obj_trace = obj,
+              run_time = difftime(t_end,t_start,units='secs')))
 
   #return(list(posteriorMean=m,priorMean=beta,priorVar=sigma2,posteriorVar=v,obj_value=obj))
 

@@ -22,7 +22,6 @@
 #'@details The problem is
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
 #'\deqn{\mu_i\sim \sum_k N(\beta,\sigma_k^2).}
-#'@export
 
 pois_mean_GMG = function(x,
                          s = NULL,

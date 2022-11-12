@@ -60,6 +60,7 @@ nb_mean_polya_gamma = function(x,
     est_r = TRUE
   }
   r_trace = r
+  t_start = Sys.time()
   for(iter in 1:maxiter){
 
     # update Ew
@@ -101,6 +102,7 @@ nb_mean_polya_gamma = function(x,
   #   message('Not converged - Increase number of iterations.')
   # }
 
+  t_end = Sys.time()
   return(list(posterior = list(mean_latent = m,
                                var_latent = v,
                                mean = r*S_exp(pseudo_x,pseudo_s,res$fitted_g$pi,res$fitted_g$mean[1],res$fitted_g[[3]]),
@@ -108,7 +110,8 @@ nb_mean_polya_gamma = function(x,
               fitted_g = res$fitted_g,
               elbo=obj[length(obj)],
               obj_trace = obj,
-              fit = res))
+              fit = res,
+              run_time = difftime(t_end,t_start,units='secs')))
   #
   # return(list(posteriorMean=m,
   #             posteriorVar=v,

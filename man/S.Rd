@@ -13,15 +13,5 @@ S = function(x,s,w,mu,grid){
 S(x, s, w, mu, grid)
 }
 \description{
-#'posterior mean operator
-S2 = function(x,s,w,mu,grid){
-  lW = matrix(log(w),nrow=length(x),ncol=length(grid),byrow=T)
-  pw = lW+dnorm(x,mean=mu,sd=outer(s^2,grid^2,FUN='+'),log=TRUE)
-  pw = pw - apply(pw,1,max)
-  pw = exp(pw)/rowSums(exp(pw))
-  temp  = outer(s^2,grid^2,FUN='/')
-  pm = x/(1+temp) + mu/(1+1/temp)
-  return(rowSums(pw*pm))
-}
 posterior mean operator
 }

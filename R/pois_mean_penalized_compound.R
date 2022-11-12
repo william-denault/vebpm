@@ -40,7 +40,8 @@ pois_mean_penalized_compound = function(x,
     ## how to choose grid in this case?
     #mixsd = ebnm:::default_smn_scale(log(x+1),sqrt(1/(x+1)),mode=beta)
     s = 1
-    mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
+    #mixsd = ashr:::autoselect.mixsd(data=list(x = log(0.1/s+x/s),s = sqrt(1/(0.1/s+x/s)),lik=list(name='normal')),sqrt(2),mode=0,grange=c(-Inf,Inf),mixcompdist = 'normal')
+    mixsd = select_mixsd(x,1)
     #mixsd = c(1e-10,1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
     #mixsd = c(0,1e-3, 1e-2, 1e-1, 0.16, 0.32, 0.64, 1, 2, 4, 8, 16)
   }
@@ -55,6 +56,7 @@ pois_mean_penalized_compound = function(x,
     w = rep(1/K,K)
   }
 
+  t_start = Sys.time()
   z_init = log(1+x)
   local_opts = list( "algorithm" = "NLOPT_LD_LBFGS","xtol_rel" = tol)
   out = nloptr(c(z_init,-z_init,w,beta),
@@ -69,6 +71,7 @@ pois_mean_penalized_compound = function(x,
                            "xtol_rel" = tol),
                y=x,grid=mixsd)
 
+  t_end = Sys.time()
   z_hat = out$solution[1:n]
   s_hat = sqrt(exp(out$solution[(n+1):(2*n)]))
   w_hat = softmax(out$solution[(2*n+1):(2*n+K)])
@@ -80,7 +83,8 @@ pois_mean_penalized_compound = function(x,
                                mean = S_exp(z_hat,s_hat,w_hat,mu_hat,mixsd)),
               fitted_g = list(weight = w_hat,mean = mu_hat,sd = mixsd),
               elbo=-out$objective,
-              fit =list(z=z_hat,s=s_hat,nloptr_fit = out)))
+              fit =list(z=z_hat,s=s_hat,nloptr_fit = out),
+              run_time = difftime(t_end,t_start,units='secs')))
 
   # return(list(posteriorMean = m,
   #             w = w_hat,
