@@ -427,7 +427,8 @@ bisection= function(f, lower, upper, ...,
     if(all(abs(fmid) < tol)){
       break
     }
-    samesign = ((fmid<0)&(fl<0))|((fmid>=0)&(fl>=0))
+    #samesign = ((fmid<0)&(fl<0))|((fmid>=0)&(fl>=0))
+    samesign = ((fmid<0)&(fl<0))
     lower = ifelse(samesign, mid, lower)
     fl = ifelse(samesign, fmid, fl)
     upper = ifelse(!samesign, mid, upper)
