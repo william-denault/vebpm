@@ -13,7 +13,8 @@ pois_mean_penalized_inversion(
   optim_method = "L-BFGS-B",
   tol = 1e-08,
   maxiter = 1000,
-  verbose = FALSE
+  verbose = FALSE,
+  theta_init = NULL
 )
 }
 \arguments{

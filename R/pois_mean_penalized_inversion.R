@@ -30,7 +30,8 @@ pois_mean_penalized_inversion = function(x,
                                          optim_method = 'L-BFGS-B',
                                          tol=1e-8,
                                          maxiter = 1000,
-                                         verbose=FALSE){
+                                         verbose=FALSE,
+                                         theta_init = NULL){
   ##########
   # S_inv is too slow
   # takes almost all time
@@ -66,7 +67,10 @@ pois_mean_penalized_inversion = function(x,
   const = lfactorial(x)
 
   t_start = Sys.time()
-  fit = optim(c(log(x+1),w,beta),f_obj,f_obj_grad,
+  if(is.null(theta_init)){
+    theta_init = log(x+1)
+  }
+  fit = optim(c(theta_init,w,beta),f_obj,f_obj_grad,
               method = optim_method,y=x,grid=mixsd,const=const,
               control=list(trace=verbose,maxit=maxiter,factr=tol/.Machine$double.eps))
   t_end = Sys.time()

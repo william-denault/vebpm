@@ -26,7 +26,8 @@ pois_mean_penalized_compound = function(x,
                                         point_mass = TRUE,
                                          maxiter = 100,
                                         verbose=FALSE,
-                                        tol=1e-4){
+                                        tol=1e-4,
+                                        z_init = NULL){
   n = length(x)
 
   # init prior mean,
@@ -57,7 +58,10 @@ pois_mean_penalized_compound = function(x,
   }
 
   t_start = Sys.time()
-  z_init = log(1+x)
+  if(is.null(z_init)){
+    z_init = log(1+x)
+  }
+
   local_opts = list( "algorithm" = "NLOPT_LD_LBFGS","xtol_rel" = tol,"maxeval" = maxiter)
   out = nloptr(c(z_init,-z_init,w,beta),
                eval_f=h_obj,

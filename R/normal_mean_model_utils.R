@@ -452,6 +452,9 @@ S_inv = function(theta,s,w,mu,grid){
     #print(lower)
     #print(upper)
     sol = try(bisection(S_inv_obj,lower = lower,upper = upper,s=s,w=w,mu=mu,grid=grid,theta=theta,search_step = s^2))
+    # if(class(sol)=='try-error'){
+    #   browser()
+    # }
     return(sol)
     # if(class(sol)=='try-error'){
     #     sol = try(multiroot(S_inv_obj,start = theta,
