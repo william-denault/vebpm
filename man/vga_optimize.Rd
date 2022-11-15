@@ -6,6 +6,13 @@
 \usage{
 vga_optimize(init_val, x, s, beta, sigma2, method = "lbfgs")
 }
+\arguments{
+\item{init_val}{initial value for (m,log(v))}
+
+\item{x, s}{data and scale factor}
+
+\item{beta, sigma2}{prior mean and variance}
+}
 \description{
 optimize vga for posterior mean and var
 }

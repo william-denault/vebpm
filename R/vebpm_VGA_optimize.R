@@ -1,6 +1,9 @@
 
 #'@title optimize vga for posterior mean and var
-#'@importFrom nloptr lbfgs
+#'@param init_val initial value for (m,log(v))
+#'@param x,s data and scale factor
+#'@param beta,sigma2 prior mean and variance
+#'@export
 vga_optimize = function(init_val,x,s,beta,sigma2,method='lbfgs'){
   if(method!="lbfgs"){
     stop('only lbfgs is implemented')
