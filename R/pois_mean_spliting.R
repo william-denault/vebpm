@@ -2,6 +2,7 @@
 #'@param x data vector
 #'@param s scaling vecto
 #'@param sigma2 prior variance
+#'@param est_sigma2 whether fix sigma2 at input or update it in iterations
 #'@param ebnm_params a list of `ebnm` parameters
 #'@param optim_method optimization method in `optim` function
 #'@param maxiter max number of iterations
@@ -27,6 +28,7 @@
 
 pois_mean_split = function(x,s=NULL,
                            sigma2 = NULL,
+                           est_sigma2 = TRUE,
                            tol=1e-5,
                            maxiter=1e3,
                            ebnm_params=NULL,
@@ -59,6 +61,7 @@ pois_mean_split = function(x,s=NULL,
   mu_pv = rep(1/n,n)
   if(is.null(sigma2)){
     sigma2 = var(log(x+1))
+    est_sigma2 = TRUE
   }
   t_start = Sys.time()
   for (iter in 1:maxiter) {
@@ -100,7 +103,10 @@ pois_mean_split = function(x,s=NULL,
     H = res$log_likelihood + n*(log(2*pi*sigma2)/2)+sum((mu_pm^2-2*mu_pm*b_pm+b_pm^2+b_pv)/sigma2/2)
 
     # Update sigma2
-    sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
+    if(est_sigma2){
+      sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
+    }
+
 
     # ELBO
     obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2

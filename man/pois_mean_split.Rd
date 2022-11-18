@@ -8,6 +8,7 @@ pois_mean_split(
   x,
   s = NULL,
   sigma2 = NULL,
+  est_sigma2 = TRUE,
   tol = 1e-05,
   maxiter = 1000,
   ebnm_params = NULL,
@@ -20,6 +21,8 @@ pois_mean_split(
 \item{s}{scaling vecto}
 
 \item{sigma2}{prior variance}
+
+\item{est_sigma2}{whether fix sigma2 at input or update it in iterations}
 
 \item{tol}{tolerance for stopping the updates}
 
