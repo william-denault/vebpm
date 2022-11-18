@@ -12,7 +12,8 @@ pois_mean_split(
   tol = 1e-05,
   maxiter = 1000,
   ebnm_params = NULL,
-  optim_method = "L-BFGS-B"
+  optim_method = "L-BFGS-B",
+  b_pm_init = NULL
 )
 }
 \arguments{

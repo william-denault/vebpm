@@ -32,7 +32,8 @@ pois_mean_split = function(x,s=NULL,
                            tol=1e-5,
                            maxiter=1e3,
                            ebnm_params=NULL,
-                           optim_method ='L-BFGS-B'){
+                           optim_method ='L-BFGS-B',
+                           b_pm_init = NULL){
   n = length(x)
   obj = rep(0,maxiter+1)
   obj[1] = -Inf
@@ -55,12 +56,17 @@ pois_mean_split = function(x,s=NULL,
   # const in objective function
   const = sum((x-1)*log(s)) - sum(lfactorial(x))
 
-  b_pm = rep(0,n)
+  if(is.null(b_pm_init)){
+    b_pm = rep(0,n)
+  }else{
+    b_pm = b_pm_init
+  }
+
   #b_pv = rep(1/n,n)
   mu_pm = log(1+x)
   mu_pv = rep(1/n,n)
   if(is.null(sigma2)){
-    sigma2 = var(log(x+1))
+    sigma2 = var(log(x+1)-b_pm)
     est_sigma2 = TRUE
   }
   t_start = Sys.time()
