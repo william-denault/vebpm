@@ -53,6 +53,8 @@ pois_mean_GG = function(x,
   if(length(s)==1){
     s = rep(s,n)
   }
+
+  const = sum((x-1)*log(s)) - sum(lfactorial(x))
   #
   t_start = Sys.time()
   if(is.null(prior_mean) | is.null(prior_var)){
@@ -70,7 +72,7 @@ pois_mean_GG = function(x,
       sigma2=prior_var
     }
 
-    const = sum((x-1)*log(s)) - sum(lfactorial(x))
+
 
     obj = rep(0,maxiter+1)
     obj[1] = -Inf
