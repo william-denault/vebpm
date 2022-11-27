@@ -7,5 +7,8 @@
 S_inv(theta, s, w, mu, grid)
 }
 \description{
-inverse PM operator
+#' jacobian of  objective function for solving S(z)=theta
+S_inv_obj_jac = function(z,theta,s,w,mu,grid){
+  return(diag(c(1+s^2*l_nm_d2_z(z,s,w,mu,grid))))
+}
 }

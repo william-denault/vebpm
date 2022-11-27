@@ -2,7 +2,7 @@
 % Please edit documentation in R/vebpm_VGA_optimize.R
 \name{vga_optimize}
 \alias{vga_optimize}
-\title{optimize vga for posterior mean and var}
+\title{optimize vga for posterior mean and var.}
 \usage{
 vga_optimize(init_val, x, s, beta, sigma2, method = "lbfgs")
 }
@@ -14,5 +14,5 @@ vga_optimize(init_val, x, s, beta, sigma2, method = "lbfgs")
 \item{beta, sigma2}{prior mean and variance}
 }
 \description{
-optimize vga for posterior mean and var
+optimize vga for posterior mean and var.
 }

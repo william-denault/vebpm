@@ -1,12 +1,12 @@
 #'@title Solve Poisson mean problem by a splitting method
 #'@param x data vector
-#'@param s scaling vecto
+#'@param s scaling vector
 #'@param sigma2 prior variance
 #'@param est_sigma2 whether fix sigma2 at input or update it in iterations
 #'@param ebnm_params a list of `ebnm` parameters
-#'@param optim_method optimization method in `optim` function
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
+#'@param mu_pm_init init value of E_q(mu), default to log(1+x)
 #'@return a list of
 #'  \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
 #'  \item{fitted_g:}{estimated prior}
@@ -26,13 +26,12 @@
 #'@export
 #'
 
-pois_mean_split2 = function(x,s=NULL,
+pois_mean_split = function(x,s=NULL,
                            sigma2 = NULL,
                            est_sigma2 = TRUE,
                            tol=1e-5,
                            maxiter=1e3,
                            ebnm_params=NULL,
-                           optim_method ='L-BFGS-B',
                            mu_pm_init = NULL){
   n = length(x)
   obj = rep(0,maxiter+1)
@@ -58,12 +57,11 @@ pois_mean_split2 = function(x,s=NULL,
 
   #b_pv = rep(1/n,n)
   if(is.null(mu_pm_init)){
-    mu_pm = log(1+x)
-  }else{
-    mu_pm = mu_pm_init
+    mu_pm_init = log(1/s+x/s)
   }
+  mu_pm = mu_pm_init
 
-  mu_pv = rep(1/n,n)
+  #mu_pv = rep(1/n,n)
   if(is.null(sigma2)){
     sigma2 = var(mu_pm)
     est_sigma2 = TRUE
@@ -84,18 +82,24 @@ pois_mean_split2 = function(x,s=NULL,
     b_pv = res$posterior$sd^2
     H = res$log_likelihood + n*(log(2*pi*sigma2)/2)+sum((mu_pm^2-2*mu_pm*b_pm+b_pm^2+b_pv)/sigma2/2)
 
-    opt = vga_optimize(c(mu_pm,log(mu_pv)),x,s,b_pm,sigma2)
+    #print(paste('after ebnm, obj=',splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)))
+
+    opt = vga_pois_solver(mu_pm,x,s,b_pm,sigma2)
+    #opt = vga_optimize(c(mu_pm,log(mu_pv)),x,s,b_pm,sigma2)
     mu_pm = opt$m
     mu_pv = opt$v
+
+    #print(paste('after vga, obj=',splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)))
 
     # Update sigma2
     if(est_sigma2){
       sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
     }
 
+    #print(paste('after sigma2, obj=',splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)))
 
     # ELBO
-    obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
+    obj[iter+1] = splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)
     if((obj[iter+1]-obj[iter])<tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
@@ -125,4 +129,7 @@ pois_mean_split2 = function(x,s=NULL,
 
 }
 
+splitting_obj = function(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n){
+  sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
+}
 

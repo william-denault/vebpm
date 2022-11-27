@@ -83,7 +83,7 @@ pois_mean_GG = function(x,
       if(est_sigma2){
         sigma2 = mean(m^2+v-2*m*beta+beta^2)
       }
-      opt = vga_optimize(c(m,log(v)),x,s,beta,sigma2)
+      opt = vga_pois_solver(m,x,s,beta,sigma2)
       m = opt$m
       v = opt$v
       obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
@@ -99,7 +99,7 @@ pois_mean_GG = function(x,
   }else{
     beta = prior_mean
     sigma2 = prior_var
-    opt = vga_optimize(c(m,log(v)),x,s,beta,sigma2)
+    opt = vga_pois_solver(m,x,s,beta,sigma2)
     m = opt$m
     v = opt$v
     obj = pois_mean_GG_obj(x,s,prior_mean,prior_var,m,v,const)

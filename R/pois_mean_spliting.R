@@ -23,10 +23,9 @@
 #'\deqn{\mu_i\sim N(b_i,\sigma^2),}
 #'\deqn{\b_i\sim g(.).}
 #'@import ebnm
-#'@export
 #'
 
-pois_mean_split = function(x,s=NULL,
+pois_mean_split_init_b = function(x,s=NULL,
                            sigma2 = NULL,
                            est_sigma2 = TRUE,
                            tol=1e-5,
