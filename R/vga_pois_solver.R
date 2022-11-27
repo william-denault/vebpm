@@ -5,9 +5,16 @@
 vga_pois_solver = function(init_val,x,s,beta,sigma2,maxiter=1000,tol=1e-8){
 
   n = length(x)
+  if(length(sigma2)==1){
+    upper = rep(sigma2,n)
+  }else if(length(sigma2)==n){
+    upper = sigma2
+  }else{
+    stop('check length of sigma2')
+  }
   # bisection
   v = try(bisection(h_v,
-                lower = rep(0,n),upper = rep(sigma2,n),
+                lower = rep(0,n),upper = upper,
                 x=x,s=s,beta=beta,sigma2=sigma2,
                 auto_adjust_interval = FALSE,
                 maxiter=maxiter,tol=tol),silent = TRUE)
