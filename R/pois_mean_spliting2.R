@@ -110,10 +110,16 @@ pois_mean_split = function(x,s=NULL,
 
   }
   t_end = Sys.time()
+  if(class(res$fitted_g)=="normalmix"){
+    mean_exp_b = S_exp(mu_pm,sqrt(sigma2),w=res$fitted_g$pi,mu = res$fitted_g$mean,grid = res$fitted_g$sd)
+  }else{
+    mean_exp_b = NULL
+  }
   return(list(posterior = list(mean_log = mu_pm,
                                mean_b = b_pm,
-                               #osteriorVar_log_mean = mu_pv,
-                               #posteriorVar_latent_b = b_pv,
+                               mean_exp_b = mean_exp_b,
+                               var_log = mu_pv,
+                               var_b = b_pv,
                                mean = exp(mu_pm + mu_pv/2)),
               fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),
               elbo=obj[length(obj)],
