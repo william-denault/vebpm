@@ -71,3 +71,11 @@ bisection= function(f, lower, upper, ...,
   }
   return(mid)
 }
+
+
+fast_ifelse <- function(test, yes, no) {
+  out <- rep(NA, length(test))
+  out[test] <- yes[test]
+  out[!test] <- no[!test]
+  out
+}

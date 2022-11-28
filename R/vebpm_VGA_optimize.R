@@ -63,9 +63,9 @@ vga_optimize_m = function(init_val,x,s,beta,sigma2,method='lbfgs'){
 
   if(class(opt)=='try-error'){
     warning(paste(opt[1],'; returning the initialization values'))
-    return(list(m=m,v=v_m(m,x,beta,sigma2)))
+    return(list(m=init_val,v=v_m(init_val,x,beta,sigma2)))
   }else{
-    return(list(m=opt$par,v=v_m(m,x,beta,sigma2),opt=opt))
+    return(list(m=opt$par,v=v_m(opt$par,x,beta,sigma2),opt=opt))
   }
 }
 
