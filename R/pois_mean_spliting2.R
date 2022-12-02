@@ -8,7 +8,7 @@
 #'@param tol tolerance for stopping the updates
 #'@param mu_pm_init init value of E_q(mu), default to log(1+x)
 #'@return a list of
-#'  \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+#'  \item{posterior:}{posterior mean of mu, posterior of exp(mu), etc.}
 #'  \item{fitted_g:}{estimated prior}
 #'  \item{obj_value:}{objective function values}
 #'@examples
@@ -21,7 +21,7 @@
 #'@details The problem is
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
 #'\deqn{\mu_i\sim N(b_i,\sigma^2),}
-#'\deqn{\b_i\sim g(.).}
+#'\deqn{b_i\sim g(.).}
 #'@import ebnm
 #'@export
 #'

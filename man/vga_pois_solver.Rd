@@ -2,15 +2,17 @@
 % Please edit documentation in R/vga_pois_solver.R
 \name{vga_pois_solver}
 \alias{vga_pois_solver}
-\title{Optimize vga poisson, using bisection for v}
+\title{Optimize vga poisson problem}
 \usage{
-vga_pois_solver(init_val, x, s, beta, sigma2, maxiter = 1000, tol = 1e-08)
+vga_pois_solver(init_val, x, s, beta, sigma2, maxiter = 1000, tol = 1e-05)
 }
 \arguments{
+\item{init_val}{initial value for posterior mean}
+
 \item{x, s}{data and scale factor}
 
-\item{beta, sigma2}{prior mean and variance}
+\item{beta, sigma2}{prior mean and variance. Their length should be equal to n=length(x)}
 }
 \description{
-Optimize vga poisson, using bisection for v
+This function tries Newton's method. If not working, then use bisection.
 }

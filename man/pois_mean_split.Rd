@@ -34,7 +34,7 @@ pois_mean_split(
 }
 \value{
 a list of
- \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+ \item{posterior:}{posterior mean of mu, posterior of exp(mu), etc.}
  \item{fitted_g:}{estimated prior}
  \item{obj_value:}{objective function values}
 }
@@ -45,7 +45,7 @@ Solve Poisson mean problem by a splitting method
 The problem is
 \deqn{x_i\sim Poisson(\exp(\mu_i)),}
 \deqn{\mu_i\sim N(b_i,\sigma^2),}
-\deqn{\b_i\sim g(.).}
+\deqn{b_i\sim g(.).}
 }
 \examples{
 \dontrun{
