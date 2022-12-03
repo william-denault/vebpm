@@ -4,7 +4,16 @@
 \alias{vga_pois_solver}
 \title{Optimize vga poisson problem}
 \usage{
-vga_pois_solver(init_val, x, s, beta, sigma2, maxiter = 1000, tol = 1e-05)
+vga_pois_solver(
+  init_val,
+  x,
+  s,
+  beta,
+  sigma2,
+  maxiter = 1000,
+  tol = 1e-05,
+  method = "newton"
+)
 }
 \arguments{
 \item{init_val}{initial value for posterior mean}

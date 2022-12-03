@@ -4,7 +4,7 @@
 #'@param x,s data and scale factor
 #'@param beta,sigma2 prior mean and variance. Their length should be equal to n=length(x)
 #'@export
-vga_pois_solver = function(init_val,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
+vga_pois_solver = function(init_val,x,s,beta,sigma2,maxiter=1000,tol=1e-5,method = 'newton'){
 
   n = length(x)
   if(length(sigma2)==1){
@@ -16,21 +16,33 @@ vga_pois_solver = function(init_val,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
   if(length(s)==1){
     s = rep(s,n)
   }
-  # use Newton's method fist
-  res = try(vga_pois_solver_Newton(init_val,x,s,beta,sigma2,maxiter=maxiter,tol=tol),silent = TRUE)
-  if(class(res)=='try-error'){
-    # If Newton failed, use bisection
-   res = try(vga_pois_solver_bisection(x,s,beta,sigma2,maxiter=maxiter,tol=tol),silent=TRUE)
-   if(class(res)=='try-error'){
-     # If bisection also failed, return initial  values with a warning.
-     warnings('Both Newton and Bisection methods failed. Returning initial values.')
-     return(list(m = init_val,v = sigma2/(sigma2*x+beta+1-init_val)))
-   }else{
-     return(res)
-   }
+  if(method=='newton'){
+    # use Newton's method fist
+    res = try(vga_pois_solver_Newton(init_val,x,s,beta,sigma2,maxiter=maxiter,tol=tol),silent = TRUE)
+    if(class(res)=='try-error'){
+      # If Newton failed, use bisection
+      res = try(vga_pois_solver_bisection(x,s,beta,sigma2,maxiter=maxiter,tol=tol),silent=TRUE)
+      if(class(res)=='try-error'){
+        # If bisection also failed, return initial  values with a warning.
+        warnings('Both Newton and Bisection methods failed. Returning initial values.')
+        return(list(m = init_val,v = sigma2/(sigma2*x+beta+1-init_val)))
+      }else{
+        return(res)
+      }
+    }else{
+      return(res)
+    }
+  }else if(method=='bisection'){
+    res = try(vga_pois_solver_bisection(x,s,beta,sigma2,maxiter=maxiter,tol=tol),silent=TRUE)
+    if(class(res)=='try-error'){
+      return(list(m = init_val,v = sigma2/(sigma2*x+beta+1-init_val)))
+    }else{
+      return(res)
+    }
   }else{
-    return(res)
+    stop('Only Newton and bisection are supported.')
   }
+
 
 }
 
