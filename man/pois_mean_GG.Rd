@@ -9,7 +9,6 @@ pois_mean_GG(
   s = NULL,
   prior_mean = NULL,
   prior_var = NULL,
-  optim_method = "L-BFGS-B",
   maxiter = 1000,
   tol = 1e-05,
   m_init = NULL,
@@ -24,8 +23,6 @@ pois_mean_GG(
 \item{prior_mean}{prior mean}
 
 \item{prior_var}{prior variance}
-
-\item{optim_method}{optimization method in `optim` function}
 
 \item{maxiter}{max number of iterations}
 

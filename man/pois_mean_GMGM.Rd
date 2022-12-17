@@ -11,8 +11,8 @@ pois_mean_GMGM(
   prior_mean = NULL,
   mixsd = NULL,
   point_mass = TRUE,
-  optim_method = "L-BFGS-B",
   maxiter = 1000,
+  optim_method = "L-BFGS-B",
   tol = 1e-05
 )
 }
@@ -29,9 +29,9 @@ pois_mean_GMGM(
 
 \item{point_mass}{whether put a point-mass in the prior}
 
-\item{optim_method}{optimization method in `optim` function}
-
 \item{maxiter}{max number of iterations}
+
+\item{optim_method}{optimization method in `optim` function}
 
 \item{tol}{tolerance for stopping the updates}
 }

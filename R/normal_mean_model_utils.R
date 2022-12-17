@@ -381,8 +381,8 @@ S_inv_obj = function(z,theta,s,w,mu,grid){
 
 
 #'@title inverse PM operator
-#'@import rootSolve
-#'@import nleqslv
+# rootSolve
+# nleqslv
 S_inv = function(theta,s,w,mu,grid){
   #print(grid[1]==0)
   #print(all.equal(w[1],1))

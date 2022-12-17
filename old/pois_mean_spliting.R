@@ -4,7 +4,6 @@
 #'@param sigma2 prior variance
 #'@param est_sigma2 whether fix sigma2 at input or update it in iterations
 #'@param ebnm_params a list of `ebnm` parameters
-#'@param optim_method optimization method in `optim` function
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
@@ -70,30 +69,9 @@ pois_mean_split_init_b = function(x,s=NULL,
   }
   t_start = Sys.time()
   for (iter in 1:maxiter) {
-
-    # # VGA
-    # for(i in 1:n){
-    #   temp = pois_mean_GG1(x[i],s[i],b_pm[i],sigma2,optim_method,mu_pm[i],mu_pv[i])
-    #   mu_pm[i] = temp$m
-    #   mu_pv[i] = temp$v
-    # }
-    opt = vga_optimize(c(mu_pm,log(mu_pv)),x,s,b_pm,sigma2)
+    opt = vga_pois_solver(mu_pm,x,s,b_pm,sigma2)
     mu_pm = opt$m
     mu_pv = opt$v
-
-    # opt = optim(c(mu_pm,log(mu_pv)),
-    #             fn = pois_mean_GG_opt_obj,
-    #             gr = pois_mean_GG_opt_obj_gradient,
-    #             x=x,
-    #             s=s,
-    #             beta=b_pm,
-    #             sigma2=sigma2,
-    #             n=n,
-    #             #const=const,
-    #             method = optim_method)
-    # mu_pm = opt$par[1:n]
-    # mu_pv = exp(opt$par[(n+1):(2*n)])
-
     # EBNM
     res = ebnm(mu_pm,sqrt(sigma2),
                mode=ebnm_params$mode,
@@ -106,16 +84,13 @@ pois_mean_split_init_b = function(x,s=NULL,
     b_pm = res$posterior$mean
     b_pv = res$posterior$sd^2
     H = res$log_likelihood + n*(log(2*pi*sigma2)/2)+sum((mu_pm^2-2*mu_pm*b_pm+b_pm^2+b_pv)/sigma2/2)
-
     # Update sigma2
     if(est_sigma2){
       sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
     }
-
-
     # ELBO
     obj[iter+1] = sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
-    if((obj[iter+1]-obj[iter])<tol){
+    if((obj[iter+1]-obj[iter])/n<tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')
@@ -136,11 +111,6 @@ pois_mean_split_init_b = function(x,s=NULL,
               fit = res,
               run_time = difftime(t_end,t_start,units='secs')))
 
-  # return(list(posteriorMean = mu_pm,
-  #             posteriorVar = mu_pv,
-  #             sigma2=sigma2,
-  #             ebnm_res=res,
-  #             obj_value=obj))
 
 }
 

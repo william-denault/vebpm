@@ -90,7 +90,7 @@ nb_mean_polya_gamma = function(x,
     }
     # calc objective function
     obj[iter+1] = neg_binom_mean_pg_obj(x,m,v,r,H_mu)
-    if((obj[iter+1]-obj[iter])<tol){
+    if((obj[iter+1]-obj[iter])/n < tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')

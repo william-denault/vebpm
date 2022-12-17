@@ -65,7 +65,7 @@ pois_mean_log1exp = function(x,ebnm_params = NULL,tol=1e-5,maxiter=1e3,kapa = NU
 
     # calc objective function
     obj[iter+1] = -sum(nll(x,mu_tilde)+nll_d1(x,mu_tilde)*(m-mu_tilde)+kapa/2*(m^2+v+mu_tilde^2-2*m*mu_tilde))+H - const
-    if((obj[iter+1]-obj[iter])<tol){
+    if((obj[iter+1]-obj[iter])/n < tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')

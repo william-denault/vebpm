@@ -100,7 +100,7 @@ pois_mean_split = function(x,s=NULL,
 
     # ELBO
     obj[iter+1] = splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)
-    if((obj[iter+1]-obj[iter])<tol){
+    if((obj[iter+1]-obj[iter])/n<tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')
@@ -126,12 +126,6 @@ pois_mean_split = function(x,s=NULL,
               obj_trace = obj,
               fit = res,
               run_time = difftime(t_end,t_start,units='secs')))
-
-  # return(list(posteriorMean = mu_pm,
-  #             posteriorVar = mu_pv,
-  #             sigma2=sigma2,
-  #             ebnm_res=res,
-  #             obj_value=obj))
 
 }
 

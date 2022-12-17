@@ -88,7 +88,7 @@ pois_mean_split_mixture = function(x,s=NULL,
   for (iter in 1:maxiter) {
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = vga_optimize(c(M[,k],log(V[,k])),x,s,b_pm,sigma2k[k])
+      opt = vga_pois_solver(M[,k],x,s,b_pm,sigma2k[k])
       M[,k] = opt$m
       V[,k] = opt$v
     }
@@ -122,7 +122,7 @@ pois_mean_split_mixture = function(x,s=NULL,
     # ELBO
     lW = matrix(log(w),nrow=n,ncol=K,byrow=T)
     obj[iter+1] = sum(qz*(X*M-s*exp(M+V/2)+lW-log(Sigma2k)/2-(M^2+V-2*M*b_pm+matrix(b_pm^2+b_pv,nrow=n,ncol=K,byrow=F))/2/Sigma2k-log(qz)+log(V)/2)) + H + const
-    if((obj[iter+1]-obj[iter])<tol){
+    if((obj[iter+1]-obj[iter])/n<tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')

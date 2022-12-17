@@ -31,8 +31,8 @@ pois_mean_GMGM = function(x,
                           prior_mean = NULL,
                           mixsd=NULL,
                           point_mass = TRUE,
-                          optim_method = 'L-BFGS-B',
                           maxiter = 1000,
+                          optim_method = 'L-BFGS-B',
                           tol = 1e-5){
 
   n = length(x)
@@ -103,7 +103,7 @@ pois_mean_GMGM = function(x,
   for(iter in 1:maxiter){
     # for each K, solve a vectorized version
     for(k in 1:K){
-      opt = vga_optimize(c(M[,k],log(V[,k])),x,s,beta,sigma2k[k])
+      opt = vga_pois_solver(M[,k],x,s,beta,sigma2k[k])
       M[,k] = opt$m
       V[,k] = opt$v
     }
@@ -141,7 +141,7 @@ pois_mean_GMGM = function(x,
 
 
     obj[iter+1] = pois_mean_GMGM_obj(X,x,s,M,V,w,beta,Sigma2k,qz,point_mass,w0,qz0,const)
-    if((obj[iter+1] - obj[iter])<tol){
+    if((obj[iter+1] - obj[iter])/n < tol){
       obj = obj[1:(iter+1)]
       if((obj[iter+1]-obj[iter])<0){
         warning('An iteration decreases ELBO. This is likely due to numerical issues.')

@@ -4,7 +4,6 @@
 #'@param s scaling vector
 #'@param prior_mean prior mean
 #'@param prior_var prior variance
-#'@param optim_method optimization method in `optim` function
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
@@ -28,7 +27,6 @@ pois_mean_GG = function(x,
                         s = NULL,
                         prior_mean = NULL,
                         prior_var=NULL,
-                        optim_method = 'L-BFGS-B',
                         maxiter = 1000,
                         tol = 1e-5,
                         m_init = NULL,
@@ -87,7 +85,7 @@ pois_mean_GG = function(x,
       m = opt$m
       v = opt$v
       obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
-      if((obj[iter+1] - obj[iter])<tol){
+      if((obj[iter+1] - obj[iter])/n <tol){
         obj = obj[1:(iter+1)]
         if((obj[iter+1]-obj[iter])<0){
           warning('An iteration decreases ELBO. This is likely due to numerical issues.')
