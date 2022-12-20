@@ -94,6 +94,7 @@ vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
 
   const0 = sigma2*x+beta + 1
   const1 = 1/sigma2
+  const2 = sigma2/2
 
   # make sure m < sigma2*x+beta
   idx = (m>(const0-1))
@@ -105,14 +106,12 @@ vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
   for(i in 1:maxiter){
 
     temp = (const0-m)
-    sexp = s*exp(m+sigma2/temp/2)
+    sexp = s*exp(m+const2/temp)
     f = x - sexp - (m-beta)/sigma2
-
     if(max(abs(f))<tol){
       break
     }
-
-    f_grad = -sexp*(1+sigma2/temp^2/2)-const1
+    f_grad = -sexp*(1+const2/temp^2)-const1
     m = m - f/f_grad
   }
   if(i>=maxiter){
@@ -130,3 +129,8 @@ vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
 # vga_pos_Newton_f_grad = function(m,x,s,beta,sigma2){
 #   return(-s*exp(m+v_m(m,x,beta,sigma2)/2)*(1+v_dm(m,x,beta,sigma2)/2)-1/sigma2)
 # }
+
+####################################
+####################################
+#################3 notes ###########
+# I tried multiroot in rootSOlve and it's not faster than mine implementation.
