@@ -98,7 +98,7 @@ vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
 
   # make sure m < sigma2*x+beta
   idx = (m>(const0-1))
-  if(sum(x)>0){
+  if(sum(idx)>0){
     m[idx] =suppressWarnings(vga_pois_solver_bisection(x[idx],s[idx],beta[idx],sigma2[idx],maxiter = 10)$m)
   }
 
