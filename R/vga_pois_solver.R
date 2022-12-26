@@ -72,6 +72,7 @@ h_v = function(v,x,s,beta,sigma2){
 #
 # }
 
+#'@export
 vga_pois_solver_bisection = function(x,s,beta,sigma2,maxiter=1000,tol=1e-5){
   n = length(x)
   if(length(sigma2)==1){
@@ -90,6 +91,7 @@ vga_pois_solver_bisection = function(x,s,beta,sigma2,maxiter=1000,tol=1e-5){
   return(list(m=m,v=v))
 }
 
+#'@export
 vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
 
   const0 = sigma2*x+beta + 1
