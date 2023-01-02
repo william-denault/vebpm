@@ -28,7 +28,7 @@ pois_mean_GG = function(x,
                         prior_mean = NULL,
                         prior_var=NULL,
                         maxiter = 1000,
-                        conv_tol = 1e-5,
+                        tol = 1e-5,
                         vga_tol=1e-5,
                         m_init = NULL,
                         v_init = NULL,
@@ -93,7 +93,7 @@ pois_mean_GG = function(x,
 
       if(conv_type=='elbo'){
         obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
-        if((obj[iter+1] - obj[iter])/n <conv_tol){
+        if((obj[iter+1] - obj[iter])/n <tol){
           obj = obj[1:(iter+1)]
           if((obj[iter+1]-obj[iter])<0){
             warning('An iteration decreases ELBO. This is likely due to numerical issues.')
@@ -103,7 +103,7 @@ pois_mean_GG = function(x,
       }
       if(conv_type=='sigma2abs'){
         obj[iter+1] = abs(sigma2-sigma2_old)
-        if(obj[iter+1] <conv_tol){
+        if(obj[iter+1] <tol){
           obj = obj[1:(iter+1)]
           break
         }
