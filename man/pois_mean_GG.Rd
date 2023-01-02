@@ -10,7 +10,7 @@ pois_mean_GG(
   prior_mean = NULL,
   prior_var = NULL,
   maxiter = 1000,
-  conv_tol = 1e-05,
+  tol = 1e-05,
   vga_tol = 1e-05,
   m_init = NULL,
   v_init = NULL,
