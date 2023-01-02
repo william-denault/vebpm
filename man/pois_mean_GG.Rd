@@ -10,9 +10,11 @@ pois_mean_GG(
   prior_mean = NULL,
   prior_var = NULL,
   maxiter = 1000,
-  tol = 1e-05,
+  conv_tol = 1e-05,
+  vga_tol = 1e-05,
   m_init = NULL,
-  v_init = NULL
+  v_init = NULL,
+  conv_type = "elbo"
 )
 }
 \arguments{
@@ -30,7 +32,7 @@ pois_mean_GG(
 }
 \value{
 a list of
- \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+ \item{posterior:}{mean_log/var_log is the posterior mean/var of mu, mean is the posterior of exp(mu)}
  \item{fitted_g:}{estimated prior}
  \item{obj_value:}{objective function values}
 }

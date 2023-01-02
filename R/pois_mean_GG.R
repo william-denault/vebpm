@@ -7,7 +7,7 @@
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
-#'  \item{posterior:}{posteriorMean_latent is the posterior mean of mu, posteriorMean_mean is the posterior of exp(mu)}
+#'  \item{posterior:}{mean_log/var_log is the posterior mean/var of mu, mean is the posterior of exp(mu)}
 #'  \item{fitted_g:}{estimated prior}
 #'  \item{obj_value:}{objective function values}
 #'@examples
@@ -28,9 +28,11 @@ pois_mean_GG = function(x,
                         prior_mean = NULL,
                         prior_var=NULL,
                         maxiter = 1000,
-                        tol = 1e-5,
+                        conv_tol = 1e-5,
+                        vga_tol=1e-5,
                         m_init = NULL,
-                        v_init = NULL){
+                        v_init = NULL,
+                        conv_type='elbo'){
 
   # init the posterior mean and variance?
   n = length(x)
@@ -59,12 +61,14 @@ pois_mean_GG = function(x,
 
     if(is.null(prior_mean)){
       est_beta = TRUE
+      beta = mean(m)
     }else{
       est_beta = FALSE
       beta = prior_mean
     }
     if(is.null(prior_var)){
       est_sigma2=TRUE
+      sigma2 = mean(m^2+v-2*m*beta+beta^2)
     }else{
       est_sigma2 = FALSE
       sigma2=prior_var
@@ -75,23 +79,36 @@ pois_mean_GG = function(x,
     obj = rep(0,maxiter+1)
     obj[1] = -Inf
     for(iter in 1:maxiter){
+      sigma2_old = sigma2
+      opt = vga_pois_solver(m,x,s,beta,sigma2,tol=vga_tol)
+      m = opt$m
+      v = opt$v
+
       if(est_beta){
         beta = mean(m)
       }
       if(est_sigma2){
         sigma2 = mean(m^2+v-2*m*beta+beta^2)
       }
-      opt = vga_pois_solver(m,x,s,beta,sigma2)
-      m = opt$m
-      v = opt$v
-      obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
-      if((obj[iter+1] - obj[iter])/n <tol){
-        obj = obj[1:(iter+1)]
-        if((obj[iter+1]-obj[iter])<0){
-          warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+
+      if(conv_type=='elbo'){
+        obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
+        if((obj[iter+1] - obj[iter])/n <conv_tol){
+          obj = obj[1:(iter+1)]
+          if((obj[iter+1]-obj[iter])<0){
+            warning('An iteration decreases ELBO. This is likely due to numerical issues.')
+          }
+          break
         }
-        break
       }
+      if(conv_type=='sigma2abs'){
+        obj[iter+1] = abs(sigma2-sigma2_old)
+        if(obj[iter+1] <conv_tol){
+          obj = obj[1:(iter+1)]
+          break
+        }
+      }
+
     }
 
   }else{
@@ -109,7 +126,7 @@ pois_mean_GG = function(x,
                                var_log = v,
                                mean = exp(m + v/2)),
               fitted_g = list(mean = beta, var=sigma2),
-              elbo=obj[length(obj)],
+              elbo=pois_mean_GG_obj(x,s,beta,sigma2,m,v,const),
               obj_trace = obj,
               run_time = difftime(t_end,t_start,units='secs')))
 

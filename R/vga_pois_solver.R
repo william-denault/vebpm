@@ -97,29 +97,32 @@ vga_pois_solver_Newton = function(m,x,s,beta,sigma2,maxiter=1000,tol=1e-5){
   const0 = sigma2*x+beta + 1
   const1 = 1/sigma2
   const2 = sigma2/2
+  const3 = beta/sigma2
 
   # make sure m < sigma2*x+beta
-  idx = (m>(const0-1))
-  if(sum(idx)>0){
-    m[idx] =suppressWarnings(vga_pois_solver_bisection(x[idx],s[idx],beta[idx],sigma2[idx],maxiter = 10)$m)
-  }
+  m = pmin(m,const0-1)
+  # idx = (m>(const0-1))
+  # if(sum(idx)>0){
+  #   m[idx] =suppressWarnings(vga_pois_solver_bisection(x[idx],s[idx],beta[idx],sigma2[idx],maxiter = 10)$m)
+  # }
 
 
   for(i in 1:maxiter){
 
     temp = (const0-m)
     sexp = s*exp(m+const2/temp)
-    f = x - sexp - (m-beta)/sigma2
+    # f = x - sexp - (m-beta)/sigma2
+    f = x - sexp - m*const1 + const3
     if(max(abs(f))<tol){
       break
     }
-    f_grad = -sexp*(1+const2/temp^2)-const1
-    m = m - f/f_grad
+    # f_grad = -sexp*(1+const2/temp^2)-const1
+    m = m - f/(-sexp*(1+const2/temp^2)-const1)
   }
   if(i>=maxiter){
     warnings('Newton method not converged yet.')
   }
-  return(list(m=m,v=sigma2/(const0-m)))
+  return(list(m=m,v=sigma2/temp))
 
 }
 
