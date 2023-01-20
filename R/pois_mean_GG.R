@@ -80,9 +80,9 @@ pois_mean_GG = function(x,
     obj[1] = -Inf
     for(iter in 1:maxiter){
       sigma2_old = sigma2
-      opt = vga_pois_solver(m,x,s,beta,sigma2,tol=vga_tol)
-      m = opt$m
-      v = opt$v
+      m = vga_pois_solver(m,x,s,beta,sigma2,tol=vga_tol)
+      v =  m$v
+      m = m$m
 
       if(est_beta){
         beta = mean(m)

@@ -46,6 +46,24 @@ vga_pois_solver = function(init_val,x,s,beta,sigma2,maxiter=1000,tol=1e-5,method
 
 }
 
+#'@title Optimize vga poisson problem 1 iteration.
+#'@descriptionThis function only performs vga for 1 iteration
+#'@export
+vga_pois_solver_newton_1iter = function(m,v,y,s,beta,sigma2){
+  if(is.null(v)){
+    v = sigma2/2
+  }
+  #for(i in 1:maxiter){
+    # newton for M
+    temp = 1/(s*exp(m+v/2))
+    m = m - (y*temp-1-(m-beta)/sigma2*temp)/(-1-1/sigma2*temp)
+    # newton for V
+    temp = 1/(s*exp(m+v/2)*v/2)
+    v = v/exp((-1-v/2/sigma2*temp + 0.5*temp)/(-(1 + v/2) - v/2/sigma2*temp))
+  #}
+  return(list(m=m,v=v))
+}
+
 h_v = function(v,x,s,beta,sigma2){
   val = (-s*exp(sigma2*x+beta+1-sigma2/v + v/2) - 1/sigma2 + 1/v)
   return(-val)
