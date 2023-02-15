@@ -55,17 +55,27 @@ pois_mean_split = function(x,s=NULL,
   # const in objective function
   const = sum((x-1)*log(s)) - sum(lfactorial(x))
 
-  #b_pv = rep(1/n,n)
-  if(is.null(mu_pm_init)){
-    mu_pm_init = log(1/s+x/s)
-  }
-  mu_pm = mu_pm_init
-
-  #mu_pv = rep(1/n,n)
+  # #b_pv = rep(1/n,n)
+  # if(is.null(mu_pm_init)){
+  #   mu_pm_init = log(1/s+x/s)
+  # }
+  # mu_pm = mu_pm_init
+  #
+  # #mu_pv = rep(1/n,n)
+  # if(is.null(sigma2)){
+  #   sigma2 = var(mu_pm)
+  #   est_sigma2 = TRUE
+  # }
   if(is.null(sigma2)){
-    sigma2 = var(mu_pm)
     est_sigma2 = TRUE
+    init_res = pois_mean_GG(x,s,prior_mean=log(sum(x)/sum(s)),prior_var=NULL,maxiter=maxiter,tol=tol)
+    mu_pm = init_res$posterior$mean_log
+    sigma2 = init_res$fitted_g$var
+  }else{
+    mu_pm = log(1/s+x/s)
   }
+  #sigma2 = min(sigma2,var(mu_pm)/4)
+  sigma2_trace = c()
   t_start = Sys.time()
   for (iter in 1:maxiter) {
 
@@ -94,6 +104,7 @@ pois_mean_split = function(x,s=NULL,
     # Update sigma2
     if(est_sigma2){
       sigma2 = mean(mu_pm^2+mu_pv+b_pm^2+b_pv-2*b_pm*mu_pm)
+      sigma2_trace[iter] = sigma2
     }
 
     #print(paste('after sigma2, obj=',splitting_obj(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n)))
@@ -113,7 +124,7 @@ pois_mean_split = function(x,s=NULL,
   if(class(res$fitted_g)=="normalmix"){
     mean_exp_b = S_exp(mu_pm,sqrt(sigma2),w=res$fitted_g$pi,mu = res$fitted_g$mean,grid = res$fitted_g$sd)
   }else{
-    mean_exp_b = NULL
+    mean_exp_b = exp(b_pm)
   }
   return(list(posterior = list(mean_log = mu_pm,
                                mean_b = b_pm,
@@ -121,7 +132,7 @@ pois_mean_split = function(x,s=NULL,
                                var_log = mu_pv,
                                var_b = b_pv,
                                mean = exp(mu_pm + mu_pv/2)),
-              fitted_g = list(sigma2=sigma2,g_b = res$fitted_g),
+              fitted_g = list(sigma2=sigma2,sigma2_trace=sigma2_trace,g_b = res$fitted_g),
               elbo=obj[length(obj)],
               obj_trace = obj,
               fit = res,
@@ -132,4 +143,11 @@ pois_mean_split = function(x,s=NULL,
 splitting_obj = function(x,s,mu_pm,mu_pv,b_pm,b_pv,sigma2,H,const,n){
   sum(x*mu_pm-s*exp(mu_pm+mu_pv/2)) +const - n/2*log(2*pi*sigma2) - sum(mu_pm^2 + mu_pv + b_pm^2 + b_pv - 2*mu_pm*b_pm)/2/sigma2 + H + sum(log(2*pi*mu_pv))/2 - n/2
 }
+
+# calculate the posterior expectation of exp(x) with a mixture of uniform prior.
+# S_exp_unif = function(fitted_g){
+#   sum(fitted_g$pi * (exp(fitted_g$b)-exp(fitted_g$a)))
+# }
+
+
 

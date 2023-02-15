@@ -7,5 +7,5 @@
 vga_pois_solver_newton_1iter(m, v, y, s, beta, sigma2)
 }
 \description{
-Optimize vga poisson problem 1 iteration.
+function only performs vga for 1 iteration
 }

@@ -15,7 +15,7 @@
 #'n = 1000
 #'mu = rnorm(n)
 #'x = rpois(n,exp(mu))
-#'pois_mean_GG(x)
+#'ebpm_normal(x)
 #'}
 #'@details The problem is
 #'\deqn{x_i\sim Poisson(\exp(\mu_i)),}
@@ -23,30 +23,19 @@
 #'@export
 
 
-pois_mean_GG = function(x,
+ebpm_normal = function(x,
                         s = NULL,
-                        prior_mean = NULL,
-                        prior_var=NULL,
+                       g_init = NULL,
+                       fix_g = FALSE,
+                       q_init = NULL,
                         maxiter = 1000,
                         tol = 1e-5,
                         vga_tol=1e-5,
-                        m_init = NULL,
-                        v_init = NULL,
                         conv_type='elbo'){
 
   # init the posterior mean and variance?
   n = length(x)
-  if(is.null(m_init)){
-    m = log(x+1)
-  }else{
-    m = m_init
-  }
 
-  if(is.null(v_init)){
-    v = rep(1/n,n)
-  }else{
-    v = v_init
-  }
   if(is.null(s)){
     s = 1
   }
@@ -54,27 +43,59 @@ pois_mean_GG = function(x,
     s = rep(s,n)
   }
 
+  if(is.null(q_init)){
+    m = log(x/s+1)
+    v = rep(1/n,n)
+  }else{
+    if(is.null(q_init$m_init)){
+      m = log(1+x/s)
+    }else{
+      m = q_init$m_init
+    }
+    if(is.null(q_init$v_init)){
+      v = rep(1/n,n)
+    }else{
+      v = q_init$v_init
+    }
+  }
+
   const = sum((x-1)*log(s)) - sum(lfactorial(x))
   #
   t_start = Sys.time()
-  if(is.null(prior_mean) | is.null(prior_var)){
+
+  if(is.null(g_init)){
+    prior_mean = NULL
+    prior_var = NULL
+  }else{
+    prior_mean = g_init$mean
+    prior_var = g_init$var
+  }
+
+  if(length(fix_g)==1){
+    est_prior_mean = !fix_g
+    est_prior_var = !fix_g
+  }else if(length(fix_g)==2){
+    est_prior_mean = !fix_g[1]
+    est_prior_var = !fix_g[2]
+  }else{
+    stop('fix_g can be either length 1 or 2')
+  }
+
+
+  if(est_prior_mean | est_prior_var){
 
     if(is.null(prior_mean)){
-      est_beta = TRUE
+      est_prior_mean = TRUE
       beta = mean(m)
     }else{
-      est_beta = FALSE
       beta = prior_mean
     }
     if(is.null(prior_var)){
-      est_sigma2=TRUE
+      est_prior_var=TRUE
       sigma2 = mean(m^2+v-2*m*beta+beta^2)
     }else{
-      est_sigma2 = FALSE
       sigma2=prior_var
     }
-
-
 
     obj = rep(0,maxiter+1)
     obj[1] = -Inf
@@ -84,15 +105,15 @@ pois_mean_GG = function(x,
       v =  m$v
       m = m$m
 
-      if(est_beta){
+      if(est_prior_mean){
         beta = mean(m)
       }
-      if(est_sigma2){
+      if(est_prior_var){
         sigma2 = mean(m^2+v-2*m*beta+beta^2)
       }
 
       if(conv_type=='elbo'){
-        obj[iter+1] = pois_mean_GG_obj(x,s,beta,sigma2,m,v,const)
+        obj[iter+1] = ebpm_normal_obj(x,s,beta,sigma2,m,v,const)
         if((obj[iter+1] - obj[iter])/n <tol){
           obj = obj[1:(iter+1)]
           if((obj[iter+1]-obj[iter])<0){
@@ -114,10 +135,10 @@ pois_mean_GG = function(x,
   }else{
     beta = prior_mean
     sigma2 = prior_var
-    opt = vga_pois_solver(m,x,s,beta,sigma2)
-    m = opt$m
-    v = opt$v
-    obj = pois_mean_GG_obj(x,s,prior_mean,prior_var,m,v,const)
+    m = vga_pois_solver(m,x,s,beta,sigma2,tol=vga_tol)
+    v = m$v
+    m = m$m
+    obj = ebpm_normal_obj(x,s,prior_mean,prior_var,m,v,const)
 
   }
   t_end = Sys.time()
@@ -126,16 +147,14 @@ pois_mean_GG = function(x,
                                var_log = v,
                                mean = exp(m + v/2)),
               fitted_g = list(mean = beta, var=sigma2),
-              elbo=pois_mean_GG_obj(x,s,beta,sigma2,m,v,const),
+              elbo=ebpm_normal_obj(x,s,beta,sigma2,m,v,const),
               obj_trace = obj,
               run_time = difftime(t_end,t_start,units='secs')))
-
-  #return(list(posteriorMean=m,priorMean=beta,priorVar=sigma2,posteriorVar=v,obj_value=obj))
 
 }
 
 
-pois_mean_GG_obj = function(x,s,beta,sigma2,m,v,const){
+ebpm_normal_obj = function(x,s,beta,sigma2,m,v,const){
   return(sum(x*m-s*exp(m+v/2)-log(sigma2)/2-(m^2+v-2*m*beta+beta^2)/2/sigma2+log(v)/2)+const)
 }
 
@@ -143,7 +162,7 @@ pois_mean_GG_obj = function(x,s,beta,sigma2,m,v,const){
 #' #'@param beta prior mean
 #' #'@param sigma2 prior variance
 #' #'@param optim_method optimization method in `optim` function
-#' pois_mean_GG1 = function(x,s,
+#' ebpm_normal1 = function(x,s,
 #'                             beta,
 #'                             sigma2,
 #'                             optim_method = 'BFGS',
@@ -163,8 +182,8 @@ pois_mean_GG_obj = function(x,s,beta,sigma2,m,v,const){
 #'   }
 #'
 #'   opt = optim(c(m,log(v)),
-#'               fn = pois_mean_GG1_obj,
-#'               gr = pois_mean_GG1_obj_gradient,
+#'               fn = ebpm_normal1_obj,
+#'               gr = ebpm_normal1_obj_gradient,
 #'               x=x,
 #'               s=s,
 #'               beta=beta,
@@ -175,12 +194,12 @@ pois_mean_GG_obj = function(x,s,beta,sigma2,m,v,const){
 #' }
 #'
 #' #'calculate objective function
-#' pois_mean_GG1_obj = function(theta,x,s,beta,sigma2){
+#' ebpm_normal1_obj = function(theta,x,s,beta,sigma2){
 #'   return(-(x*theta[1]-s*exp(theta[1]+exp(theta[2])/2)-(theta[1]^2+exp(theta[2])-2*theta[1]*beta)/2/sigma2+log(exp(theta[2]))/2))
 #' }
 #'
 #' #'calculate gradient vector
-#' pois_mean_GG1_obj_gradient = function(theta,x,s,beta,sigma2){
+#' ebpm_normal1_obj_gradient = function(theta,x,s,beta,sigma2){
 #'   g1 = -(x-s*exp(theta[1]+exp(theta[2])/2)-theta[1]/sigma2+beta/sigma2)
 #'   g2 = -(-exp(theta[2])/2*s*exp(theta[1]+exp(theta[2])/2) - exp(theta[2])/2/sigma2 + 1/2)
 #'   return(c(g1,g2))
