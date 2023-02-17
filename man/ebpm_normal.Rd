@@ -21,13 +21,15 @@ ebpm_normal(
 
 \item{s}{scaling vector}
 
+\item{g_init}{a list of mean, and var. Can be NULL for both parameters.}
+
+\item{fix_g}{Whether fix g at g_init. If only fix either mean, or var, fix_g can be a length 2 boolean vector.}
+
+\item{q_init}{a list of init value of m(posterior mean) and v(posterior var).}
+
 \item{maxiter}{max number of iterations}
 
 \item{tol}{tolerance for stopping the updates}
-
-\item{prior_mean}{prior mean}
-
-\item{prior_var}{prior variance}
 }
 \value{
 a list of

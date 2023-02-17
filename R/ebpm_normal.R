@@ -2,8 +2,9 @@
 #'@description Gaussian prior, Gaussian posterior in Poisson mean problem.
 #'@param x data vector
 #'@param s scaling vector
-#'@param prior_mean prior mean
-#'@param prior_var prior variance
+#'@param g_init a list of mean, and var. Can be NULL for both parameters.
+#'@param fix_g Whether fix g at g_init. If only fix either mean, or var, fix_g can be a length 2 boolean vector.
+#'@param q_init a list of init value of m(posterior mean) and v(posterior var).
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
