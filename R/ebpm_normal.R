@@ -4,7 +4,7 @@
 #'@param s scaling vector
 #'@param g_init a list of mean, and var. Can be NULL for both parameters.
 #'@param fix_g Whether fix g at g_init. If only fix either mean, or var, fix_g can be a length 2 boolean vector.
-#'@param q_init a list of init value of m(posterior mean) and v(posterior var).
+#'@param q_init a list of init value of m_init(posterior mean) and v_init(posterior var).
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
 #'@return a list of
@@ -58,6 +58,9 @@ ebpm_normal = function(x,
     }else{
       v = q_init$v_init
     }
+  }
+  if(length(v)==1){
+    v = rep(v,n)
   }
 
   const = sum((x-1)*log(s)) - sum(lfactorial(x))

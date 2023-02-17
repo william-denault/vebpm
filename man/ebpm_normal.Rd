@@ -25,7 +25,7 @@ ebpm_normal(
 
 \item{fix_g}{Whether fix g at g_init. If only fix either mean, or var, fix_g can be a length 2 boolean vector.}
 
-\item{q_init}{a list of init value of m(posterior mean) and v(posterior var).}
+\item{q_init}{a list of init value of m_init(posterior mean) and v_init(posterior var).}
 
 \item{maxiter}{max number of iterations}
 
