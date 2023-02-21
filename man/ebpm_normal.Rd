@@ -13,7 +13,8 @@ ebpm_normal(
   maxiter = 1000,
   tol = 1e-05,
   vga_tol = 1e-05,
-  conv_type = "elbo"
+  conv_type = "elbo",
+  return_sigma2_trace = FALSE
 )
 }
 \arguments{
@@ -30,6 +31,10 @@ ebpm_normal(
 \item{maxiter}{max number of iterations}
 
 \item{tol}{tolerance for stopping the updates}
+
+\item{conv_type}{convergence criteria, default to be elbo}
+
+\item{return_sigma2_trace}{whether return the trace of sigma2 estiamtes}
 }
 \value{
 a list of

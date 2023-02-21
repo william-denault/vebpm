@@ -7,6 +7,8 @@
 #'@param q_init a list of init value of m_init(posterior mean) and v_init(posterior var).
 #'@param maxiter max number of iterations
 #'@param tol tolerance for stopping the updates
+#'@param conv_type convergence criteria, default to be elbo
+#'@param return_sigma2_trace whether return the trace of sigma2 estiamtes
 #'@return a list of
 #'  \item{posterior:}{mean_log/var_log is the posterior mean/var of mu, mean is the posterior of exp(mu)}
 #'  \item{fitted_g:}{estimated prior}
@@ -32,7 +34,8 @@ ebpm_normal = function(x,
                         maxiter = 1000,
                         tol = 1e-5,
                         vga_tol=1e-5,
-                        conv_type='elbo'){
+                        conv_type='elbo',
+                       return_sigma2_trace=FALSE){
 
   # init the posterior mean and variance?
   n = length(x)
@@ -103,6 +106,7 @@ ebpm_normal = function(x,
 
     obj = rep(0,maxiter+1)
     obj[1] = -Inf
+    sigma2_trace = sigma2
     for(iter in 1:maxiter){
       sigma2_old = sigma2
       m = vga_pois_solver(m,x,s,beta,sigma2,tol=vga_tol)
@@ -114,6 +118,9 @@ ebpm_normal = function(x,
       }
       if(est_prior_var){
         sigma2 = mean(m^2+v-2*m*beta+beta^2)
+        if(return_sigma2_trace){
+          sigma2_trace[iter+1] = sigma2
+        }
       }
 
       if(conv_type=='elbo'){
@@ -153,6 +160,7 @@ ebpm_normal = function(x,
               fitted_g = list(mean = beta, var=sigma2),
               elbo=ebpm_normal_obj(x,s,beta,sigma2,m,v,const),
               obj_trace = obj,
+              sigma2_trace=sigma2_trace,
               run_time = difftime(t_end,t_start,units='secs')))
 
 }
