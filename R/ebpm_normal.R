@@ -88,7 +88,7 @@ ebpm_normal = function(x,
     stop('fix_g can be either length 1 or 2')
   }
 
-
+  sigma2_trace = prior_var
   if(est_prior_mean | est_prior_var){
 
     if(is.null(prior_mean)){
