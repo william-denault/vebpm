@@ -22,7 +22,7 @@ plot(y,main='inversion',col='grey80',pch=20)
 lines(mu,col='grey60')
 lines(fit_inv$posterior$mean)
 
-fit_compound = ebnm_penalized_inversion(y,s,g_init = list(sd=grids))
+fit_compound = ebnm_penalized_compound(y,s,g_init = list(sd=grids))
 fit_compound$log_likelihood
 plot(y,main='compound',col='grey80',pch=20)
 lines(mu,col='grey60')

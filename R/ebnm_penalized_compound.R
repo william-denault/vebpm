@@ -6,6 +6,7 @@
 #'@param scale default to 'estimate'
 #'@param control NULL
 #'@return posterior, fitted_g, log_likelihood
+#'@export
 ebnm_penalized_compound = function(x,s,mode = 0,
                                    scale = 'estimate',
                                    g_init=NULL,
@@ -33,10 +34,11 @@ ebnm_penalized_compound = function(x,s,mode = 0,
               y=y,grid=grid,s=s)
   z = out$par[1:n]
   w = softmax(out$par[-(1:n)])
-  posteriorMean = S(z,s,w,grid)
+  posteriorMean = S(z,s,w,0,grid)
   return(list(posterior = list(mean=posteriorMean),
               fitted_g=list(pi=w,sd=grid),
-              log_likelihood = -out$value))
+              log_likelihood = -out$value,
+              opt = out))
 }
 
 

@@ -6,6 +6,7 @@
 #'@param scale default to 'estimate'
 #'@param control NULL
 #'@return posterior, fitted_g, log_likelihood
+#'@export
 ebnm_penalized_inversion = function(x,s,
                                     mode = 0,
                                     scale = 'estimate',
@@ -41,7 +42,8 @@ ebnm_penalized_inversion = function(x,s,
 
   return(list(posterior=list(mean = out$par[1:n]),
               fitted_g = list(pi = softmax(out$par[-(1:n)]),sd=grid),
-              log_likelihood = -out$value))
+              log_likelihood = -out$value,
+              opt = out))
 }
 
 #'objective function ebnm_compound
