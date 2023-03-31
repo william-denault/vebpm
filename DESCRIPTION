@@ -1,7 +1,7 @@
 Package: vebpm
 Type: Package
 Title: Solve Variational Empirical Bayes Poisson Mean problems
-Version: 0.4.5
+Version: 0.4.6
 Author: Dongyue Xie
 Maintainer: Dongyue Xie <dongyxie@gmail.com>
 Description: This package contains a number of methods for solving Variational Empirical Bayes Poisson Mean problems.
