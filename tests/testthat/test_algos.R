@@ -22,3 +22,57 @@ res_inversion = pois_mean_penalized_inversion(x,tol=1e-4)
 
 #simdata = gen_data_gamma(n=100,n_simu=2)
 #out= simu_study_poisson_mean(simdata,n_cores = 1)
+
+
+set.seed(12345)
+n = 1000
+#pi0=0.9
+#mu = 5
+#b = c(rep(mu,n*pi0),rnorm(n-n*pi0,mu,1))
+#b = c(rep(0,n*pi0),rep(mu,n-n*pi0))
+#x = rpois(n,exp(b))
+x = rpois(n,10)
+fit = pois_mean_split(x,ebnm_params = list(prior_family='normal'),mu_pm_init = NULL,sigma2 = 1,tol=1e-100)
+fit$fitted_g$sigma2_trace
+fit$fitted_g$g_b
+
+fit$posterior$mean_log[1:5]
+fit$fit$posterior$mean[1:5]
+
+sqrt(fit$posterior$var_log[1:5])
+fit$fit$posterior$sd[1:5]
+
+plot(x,col='grey80')
+lines(fit$posterior$mean_exp_b)
+lines(fit$posterior$mean)
+
+plot(b,col='grey80')
+lines(fit$posterior$mean_b)
+
+fit_true = pois_mean_GMGM(x,mixsd=fit$fitted_g$g_b$sd[-1],tol=1e-10)
+
+plot(fit$posterior$mean_log,fit$posterior$mean_b)
+abline(a=0,b=1)
+
+hist(fit$posterior$var_b)
+hist(fit$posterior$var_log)
+
+
+fit2 = pois_mean_split(x,ebnm_params = list(prior_family='point_normal',g_init=ashr::normalmix(pi=c(0.8,0.2),mean=c(5,5),sd=c(0,1)),fix_g=TRUE),
+                       mu_pm_init = b,sigma2 = 1,tol=1e-10)
+fit2$fitted_g$sigma2_trace
+fit2$fitted_g$g_b
+
+plot(x,col='grey80')
+lines(fit2$posterior$mean_exp_b)
+lines(fit2$posterior$mean,col='grey80')
+
+
+
+
+
+
+
+
+
+

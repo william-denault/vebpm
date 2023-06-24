@@ -68,11 +68,14 @@ pois_mean_split = function(x,s=NULL,
   # }
   if(is.null(sigma2)){
     est_sigma2 = TRUE
-    init_res = pois_mean_GG(x,s,prior_mean=log(sum(x)/sum(s)),prior_var=NULL,maxiter=maxiter,tol=tol)
+    init_res = ebpm_normal(x,s,g_init=list(mean=log(sum(x)/sum(s)),var=NULL),fix_g=c(T,F),maxiter=maxiter,tol=tol)
     mu_pm = init_res$posterior$mean_log
     sigma2 = init_res$fitted_g$var
   }else{
     mu_pm = log(1/s+x/s)
+  }
+  if(!is.null(mu_pm_init)){
+    mu_pm = mu_pm_init
   }
   #sigma2 = min(sigma2,var(mu_pm)/4)
   sigma2_trace = c()
