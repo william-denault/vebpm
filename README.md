@@ -8,5 +8,9 @@ $$\mu_i\sim g(\cdot).$$
 
 ```r
 # install.packages('devtools')
+
+## Make sure R package ebnm is installed
+# devtools::install_github('stephenslab/ebnm')
+
 devtools::install_github('DongyueXie/vebpm')
 ```
