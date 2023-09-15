@@ -1,7 +1,7 @@
 Package: vebpm
 Type: Package
 Title: Solve Variational Empirical Bayes Poisson Mean problems
-Version: 0.4.8
+Version: 0.4.9
 Author: Dongyue Xie
 Maintainer: Dongyue Xie <dongyxie@gmail.com>
 Description: This package contains a number of methods for solving Variational Empirical Bayes Poisson Mean problems.
@@ -15,4 +15,4 @@ Config/testthat/edition: 3
 Imports: 
   nloptr (>= 2.0.3)
 Remotes: 
-  github::stephenslab/ebnm
+  stephenslab/ebnm
