@@ -1,5 +1,6 @@
 
 #'@title default ebnm parameters
+#'@importFrom ebnm ebnm_output_default
 #'@export
 ebnm_params_default = function(){
   return(list(prior_family='normal_scale_mixture',
@@ -7,6 +8,6 @@ ebnm_params_default = function(){
               scale = "estimate",
               g_init = NULL,
               fix_g = FALSE,
-              output = output_default(),
+              output = ebnm_output_default(),
               optmethod = NULL))
 }
