@@ -13,6 +13,6 @@ Suggests:
     testthat
 Config/testthat/edition: 3
 Imports: 
-  nloptr (>= 2.0.3)
+  nloptr
 Remotes: 
   stephenslab/ebnm
