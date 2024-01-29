@@ -12,5 +12,5 @@ $$\mu_i\sim g(\cdot).$$
 ## Make sure R package ebnm is installed
 # devtools::install_github('stephenslab/ebnm')
 
-devtools::install_github('DongyueXie/vebpm')
+devtools::install_github('william-denault/vebpm')
 ```
